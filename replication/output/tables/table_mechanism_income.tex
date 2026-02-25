@@ -1,0 +1,26 @@
+\begin{table}[ht!]
+\centering
+\caption{Income Channel Decomposition: Pooled TWFE Estimates}
+\label{tab:income_channel}
+\begin{threeparttable}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{Binary Treatment} & \multicolumn{2}{c}{Cumulative Intensity} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+& ln(Rural inc.) & ln(Urban inc.) & ln(Rural inc.) & ln(Urban inc.) \\
+& (1) & (2) & (3) & (4) \\
+\midrule
+Treatment & $0.018^{}$ & $0.002^{}$ & $0.046^{***}$ & $0.028^{***}$ \\
+ & $(0.013)$ & $(0.011)$ & $(0.010)$ & $(0.007)$ \\
+\midrule
+County FE & Yes & Yes & Yes & Yes \\
+Year FE & Yes & Yes & Yes & Yes \\
+Observations & 444 & 444 & 444 & 444 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\item \small Standard errors clustered by county in parentheses.
+\item $^{*}p<0.1$; $^{**}p<0.05$; $^{***}p<0.01$
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

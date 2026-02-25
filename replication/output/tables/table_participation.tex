@@ -1,0 +1,27 @@
+\begin{table}[ht!]
+\centering
+\caption{Selective Participation: Baseline Inequality and Trading Intensity}
+\label{tab:participation}
+\begin{threeparttable}
+\begin{tabular}{lcc}
+\toprule
+& Participation (LPM) & ln(Cumulative area) \\
+& (1) & (2) \\
+\midrule
+Baseline income ratio & $0.170^{}$ & $0.513^{}$ \\
+ & $(0.122)$ & $(0.341)$ \\[3pt]
+Log fiscal revenue & $0.139^{}$ & $0.475^{**}$ \\
+ & $(0.099)$ & $(0.226)$ \\[3pt]
+Log urbanization rate & $-0.398^{}$ & $-0.919^{}$ \\
+ & $(0.369)$ & $(0.577)$ \\[3pt]
+\midrule
+Year FE & Yes & Yes \\
+Observations & 334 & 218 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\item \small Column~(1): linear probability model for annual participation (positive transaction area). Column~(2): OLS for log cumulative transaction area, conditional on participation. Sample restricted to treated counties in post-treatment years. Standard errors clustered by county.
+\item $^{*}p<0.1$; $^{**}p<0.05$; $^{***}p<0.01$
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,25 @@
+\begin{table}[ht!]
+\centering
+\caption{Leave-One-Out Sensitivity: Dropping Each Never-Treated County}
+\label{tab:loo}
+\begin{threeparttable}
+\begin{tabular}{lccccc}
+\toprule
+Dropped county & ATT & SE & $p$-value & Counties & Obs. \\
+\midrule
+Dadukou District & $-0.056^{*}$ & $(0.030)$ & $0.075$ & 36 & 432 \\
+Jiangbei District & $-0.055^{*}$ & $(0.030)$ & $0.078$ & 36 & 432 \\
+Shapingba District & $-0.056^{*}$ & $(0.030)$ & $0.073$ & 36 & 432 \\
+Nan'an District & $-0.055^{*}$ & $(0.030)$ & $0.077$ & 36 & 432 \\
+Dazu District & $-0.060^{*}$ & $(0.031)$ & $0.063$ & 36 & 432 \\
+Changshou District & $-0.060^{*}$ & $(0.031)$ & $0.063$ & 36 & 432 \\
+\midrule
+Full sample & $-0.062^{*}$ & $(0.031)$ & $0.050$ & 37 & 444 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} Dependent variable is the urban--rural income ratio. Each row drops one never-treated county. County and year fixed effects. Standard errors clustered at the county level in parentheses. $^{*}p<0.1$; $^{**}p<0.05$; $^{***}p<0.01$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

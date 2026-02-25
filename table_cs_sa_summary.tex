@@ -1,0 +1,20 @@
+\begin{table}[ht!]
+\centering
+\caption{Heterogeneity-Robust Estimates of the Land Coupon Program's Effect on the Urban--Rural Income Ratio}
+\label{tab:cs_sa_summary}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{2}{c}{Overall} & \multicolumn{3}{c}{Event-study profile} & \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-6}
+Estimator & Dynamic ATT & SE & $e=0$ & $e=5$ & $e=9$ & Controls \\
+\midrule
+CS doubly robust & $-0.209$*** & $(0.011)$ & $-0.053$ & $-0.211$ & $-0.289$ & No \\
+CS outcome reg. & $-0.208$*** & $(0.043)$ & $-0.127$ & $-0.364$ & $-0.076$ & Yes \\
+SA interaction-wtd. & $-0.222$*** & $(0.009)$ & $-0.081$ & $-0.231$ & $-0.289$ & No \\
+SA interaction-wtd. & $-0.193$*** & $(0.010)$ & $-0.076$ & $-0.200$ & $-0.233$ & Yes \\
+\midrule
+\multicolumn{7}{p{0.95\textwidth}}{\footnotesize \textit{Notes:} CS = \citet{callaway2021difference}; SA = \citet{sun2021estimating}. CS comparison group: not-yet-treated; SA comparison group: never-treated. The 2009 cohort (14 counties), which lacks pre-treatment observations, is automatically excluded by the CS estimator and manually excluded from SA. The CS baseline uses the doubly robust estimator; the controlled specification uses outcome regression because the propensity score model exhibits perfect separation with small cohort sizes. SA controls: log GDP per capita, log fiscal revenue, log urbanization rate. Event-study profiles are trimmed to $e \in [-4, 9]$; at $e = 10$, only one cohort (2010) contributes, producing a composition artifact. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.} \\
+\bottomrule
+\end{tabular}
+\end{table}

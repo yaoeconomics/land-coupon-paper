@@ -1,0 +1,26 @@
+\begin{table}[ht!]
+\centering
+\caption{Mechanism: Income Channel Decomposition}
+\label{tab:income_channel}
+\begin{threeparttable}
+\begin{tabular}{l*{4}{c}}
+\toprule
+ & \multicolumn{2}{c}{Log rural income} & \multicolumn{2}{c}{Log urban income} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & (1) & (2) & (3) & (4) \\
+\midrule
+Treated ($D_{it}$) & $0.018$ & $0.018$ & $0.002$ & $0.001$ \\
+ & $(0.013)$ & $(0.011)$ & $(0.011)$ & $(0.008)$ \\
+\midrule
+Controls & No & Yes & No & Yes \\
+County FE & Yes & Yes & Yes & Yes \\
+Year FE & Yes & Yes & Yes & Yes \\
+Observations & 444 & 444 & 444 & 444 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} Dependent variables are log rural and log urban per capita disposable income. Controls include log GDP per capita, log fiscal revenue, and log urbanization rate. Standard errors clustered at the county level in parentheses. $^{*}p<0.1$; $^{**}p<0.05$; $^{***}p<0.01$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

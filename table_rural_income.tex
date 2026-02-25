@@ -1,0 +1,40 @@
+\begin{table}[htbp]
+\centering
+\caption{Effect of Land Coupon Program on Rural Disposable Income}
+\label{tab:rural_income}
+\begin{threeparttable}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{4}{c}{Dependent variable: Log rural disposable income} \\
+\midrule
+ & (1) & (2) & (3) & (4) \\
+ & Binary & Cumulative & Extended & CS--DR \\
+ & TWFE & TWFE & Panel TWFE & Overall ATT \\
+\midrule
+Treated (binary) & $0.018^{}$ & & $0.022^{***}$ & \\
+ & $(0.013)$ & & $(0.006)$ & \\[3pt]
+Cumulative area (log) & & $0.046^{***}$ & & \\
+ & & $(0.010)$ & & \\[3pt]
+CS overall ATT & & & & $0.093^{***}$ \\
+ & & & & $(0.015)$ \\[6pt]
+\midrule
+County FE & Yes & Yes & Yes & --- \\
+Year FE & Yes & Yes & Yes & --- \\
+Panel & 2009--2020 & 2009--2020 & 2005--2020 & 2009--2020 \\
+Observations & 444 & 444 & 592 & 276 \\
+Clusters & 37 & 37 & 37 & 23 \\
+$R^2$ (within) & 0.021 & 0.332 & 0.068 & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Standard errors clustered at the county level in parentheses.
+Column~(1) reports the binary TWFE estimate on the balanced 2009--2020 panel.
+Column~(2) uses cumulative transaction area (log) as a continuous treatment intensity measure.
+Column~(3) extends the panel to 2005--2020.
+Column~(4) reports the Callaway and Sant'Anna (2021) doubly robust overall ATT;
+the 2009 cohort is dropped because it lacks a pre-treatment period.
+*** $p<0.01$, ** $p<0.05$, * $p<0.1$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,26 @@
+\begin{table}[ht!]
+\centering
+\caption{Summary of Heterogeneity-Robust Estimates}
+\label{tab:cs_sa_summary}
+\begin{threeparttable}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{Callaway--Sant'Anna} & \multicolumn{2}{c}{Sun--Abraham} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+& No controls & Controls & No controls & Controls \\
+& (1) & (2) & (3) & (4) \\
+\midrule
+Dynamic ATT & $-0.209^{***}$ & --- & $-0.183^{***}$ & $-0.174^{***}$ \\
+ & $(0.011)$ & --- & $(0.011)$ & $(0.015)$ \\
+\midrule
+Observations & 276 & 276 & 276 & 276 \\
+2009 cohort included & No & No & No & No \\
+Comparison group & Not-yet-treated & Not-yet-treated & Never-treated & Never-treated \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\item \small Dynamic ATT is the average of post-treatment event-study coefficients. CS: Callaway \& Sant'Anna (2021) doubly robust estimator. SA: Sun \& Abraham (2021) interaction-weighted estimator. Column~(2) is not estimated programmatically here (see paper for outcome regression estimate). Standard errors approximate.
+\item $^{*}p<0.1$; $^{**}p<0.05$; $^{***}p<0.01$
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,309 @@
+================================================================================
+COMPREHENSIVE DATASET ANALYSIS: CHENGDU vs CHONGQING
+================================================================================
+Date: 2026-02-24
+Data Files:
+  - Chengdu: /sessions/keen-sleepy-hypatia/mnt/Land Coupon Paper/replication/data/Chengdu_counties_data.xlsx
+  - Chongqing: /sessions/keen-sleepy-hypatia/mnt/Land Coupon Paper/replication/data/Chongqing.xlsx
+
+================================================================================
+1. DATASET STRUCTURE
+================================================================================
+
+CHENGDU:
+  Shape: 320 observations × 43 variables
+  Time period: 2005-2020 (16 years)
+  Counties: 20
+  Panel: PERFECTLY BALANCED (20 × 16 = 320 obs)
+  County names:
+    双流区, 大邑县, 崇州市, 彭州市, 成华区, 新津县, 新都区, 武侯区, 温江区, 
+    简阳市, 蒲江县, 邛崃市, 郫都区, 都江堰市, 金堂县, 金牛区, 锦江区, 青白江区, 
+    青羊区, 龙泉驿区
+
+CHONGQING:
+  Shape: 444 observations × 48 variables
+  Time period: 2009-2020 (12 years)
+  Counties: 37
+  Panel: PERFECTLY BALANCED (37 × 12 = 444 obs)
+  County names:
+    万州区, 丰都县, 九龙坡区, 云阳县, 北碚区, 南岸区, 南川区, 合川区, 垫江县, 
+    城口县, 大渡口区, 大足区, 奉节县, 巫山县, 巫溪县, 巴南区, 开州区, 
+    彭水苗族土家族自治县, 忠县, 梁平区, 武隆区, 永川区, 江北区, 江津区, 沙坪坝区, 
+    涪陵区, 渝北区, 潼南区, 璧山区, 石柱土家族自治县, 秀山土家族苗族自治县, 
+    綦江区, 荣昌区, 酉阳土家族苗族自治县, 铜梁区, 长寿区, 黔江区
+
+================================================================================
+2. KEY VARIABLES: AVAILABILITY AND COMPARISON
+================================================================================
+
+Core Variables (Required for Analysis):
+┌─────────────────────────────┬──────────────┬──────────────┬─────────────┐
+│ Variable                    │ Chengdu      │ Chongqing    │ Compatible  │
+├─────────────────────────────┼──────────────┼──────────────┼─────────────┤
+│ Urban Income (mu_u)         │ YES (59.4%*) │ YES (100%)   │ YES         │
+│ Rural Income (mu_r)         │ YES (70.6%*) │ YES (100%)   │ YES         │
+│ Income Ratio                │ NO - NEED    │ YES (100%)   │ DIFFERENT   │
+│                             │ TO COMPUTE   │              │             │
+│ GDP per Capita (gdp_pc)     │ YES (100%)   │ YES (100%)   │ YES         │
+│ GDP Total (GDP_total)       │ YES (100%)   │ YES (100%)   │ YES         │
+│ Urbanization Rate           │ YES (0.0%*)  │ YES (100%)   │ DIFFERENT   │
+│ Population (10k)            │ YES (86.9%*) │ YES (100%)   │ YES         │
+│ Land Coupon Binary          │ YES (100%)   │ YES (100%)   │ YES         │
+│ After First Coupon          │ YES (100%)   │ YES (100%)   │ YES         │
+└─────────────────────────────┴──────────────┴──────────────┴─────────────┘
+
+*Percentages = % of non-missing values in dataset
+
+CRITICAL FINDINGS:
+1. CHENGDU HAS MISSING URBANIZATION RATE: 城镇化率_常住人口 is 100% missing
+   - Column exists but contains NO DATA
+   - Cannot use for direct comparison without computing from other variables
+
+2. CHENGDU HAS MISSING INCOME RATIO: Must compute manually as mu_u / mu_r
+   - Chongqing has pre-calculated urban_rural_income_ratio
+
+3. DATA QUALITY DIFFERENCES:
+   - Chongqing: Nearly complete data for all core variables (>95%)
+   - Chengdu: Significant missingness in mu_u (59.4%) and mu_r (70.6%)
+   - Chengdu: 城镇单位在岗职工平均工资 only 31.9% complete
+
+================================================================================
+3. SUMMARY STATISTICS: KEY VARIABLES
+================================================================================
+
+CHENGDU (2005-2020):
+                    mu_u          mu_r           gdp_pc      total_pop
+                    (n=190)       (n=226)        (n=320)      (n=278)
+Mean                32,346        13,490         52,997       67.0
+Std Dev             9,820         8,421          33,879       29.8
+Min                 11,825        3,092          6,223        25.7
+Median              32,076        11,280         45,211        63.9
+Max                 52,036        51,299         161,656       207.0
+
+CHONGQING (2009-2020):
+                    mu_u          mu_r           Income Ratio gdp_pc      urbanization  total_pop
+                    (n=444)       (n=444)        (n=444)      (n=444)    (n=444)         (n=444)
+Mean                26,171        11,228         2.465        44,096     55.4%           89.3
+Std Dev             8,564         4,852          0.390        24,079     20.4%           35.4
+Min                 10,323        3,078          1.784        7,056      21.6%           23.3
+Median              25,436        10,525         2.408        40,923     50.6%           85.2
+Max                 46,429        24,869         3.802        143,380    99.2%           176.1
+
+KEY OBSERVATIONS:
+- Chengdu has higher average urban income (32,346 vs 26,171)
+- Chengdu has higher average rural income (13,490 vs 11,228)
+- Chengdu has higher average GDP per capita (52,997 vs 44,096)
+- Chongqing shows considerable urban-rural income inequality (avg ratio 2.465)
+- Time periods are different: Chengdu 2005-2020, Chongqing 2009-2020
+
+================================================================================
+4. CHONGQING TREATMENT ANALYSIS: NEVER-TREATED COUNTIES
+================================================================================
+
+Definition of Never-Treated:
+  A county is "never-treated" if land_coupon_transaction_binary = 0
+  throughout the entire 2009-2020 period
+
+IDENTIFICATION RESULTS:
+  Total counties: 37
+  Never-treated counties: 6 (16.2%)
+  Treated counties: 31 (83.8%)
+
+NEVER-TREATED COUNTIES (6):
+  1. 南岸区 (Nan'an District)
+  2. 大渡口区 (Dadukou District)
+  3. 大足区 (Dazu District)
+  4. 江北区 (Jiangbei District)
+  5. 沙坪坝区 (Shapingba District)
+  6. 长寿区 (Changshou District)
+
+VERIFICATION:
+  Both criteria (land_coupon_transaction_binary and after_first_land_coupon_transaction)
+  identify the SAME 6 counties as never-treated.
+
+================================================================================
+5. BASELINE (2009) CHARACTERISTICS: NEVER-TREATED vs TREATED
+================================================================================
+
+COMPARISON OF MEANS:
+
+Urban Income (mu_u):
+  Never-treated (n=6):  Mean = 16,440  (Std = 1,265)
+  Treated (n=31):       Mean = 13,860  (Std = 2,022)
+  Difference:           -2,581 (p < 0.05)
+  Interpretation: Never-treated counties are RICHER
+
+Rural Income (mu_r):
+  Never-treated (n=6):  Mean = 6,912   (Std = 1,096)
+  Treated (n=31):       Mean = 4,703   (Std = 1,156)
+  Difference:           -2,210 (p < 0.05)
+  Interpretation: Never-treated counties are RICHER
+
+Income Ratio (Urban/Rural):
+  Never-treated (n=6):  Mean = 2.408   (Std = 0.226)
+  Treated (n=31):       Mean = 3.027   (Std = 0.384)
+  Difference:           +0.619 (p < 0.05)
+  Interpretation: Treated counties have HIGHER urban-rural inequality
+
+GDP per Capita (gdp_pc):
+  Never-treated (n=6):  Mean = 36,761  (Std = 14,798)
+  Treated (n=31):       Mean = 18,401  (Std = 10,561)
+  Difference:           -18,359 (p < 0.05)
+  Interpretation: Never-treated counties are MUCH RICHER (99% higher)
+
+Urbanization Rate:
+  Never-treated (n=6):  Mean = 74.23%  (Std = 24.43%)
+  Treated (n=31):       Mean = 40.46%  (Std = 17.01%)
+  Difference:           -33.77% (p < 0.01)
+  Interpretation: Never-treated counties are MUCH MORE URBANIZED
+
+Population (in 10,000 people):
+  Never-treated (n=6):  Mean = 66.33   (Std = 26.96)
+  Treated (n=31):       Mean = 89.93   (Std = 35.58)
+  Difference:           +23.60 (not significant)
+  Interpretation: Treated counties are slightly larger
+
+================================================================================
+6. CRITICAL INSIGHT: SELECTION BIAS IN CHONGQING
+================================================================================
+
+SYSTEMATIC IMBALANCE:
+The 6 never-treated counties are systematically different from the 31 treated counties:
+
+Never-Treated Counties are:
+  ✓ 18.6% RICHER in urban income
+  ✓ 47.0% RICHER in rural income
+  ✓ 99.9% RICHER in GDP per capita (36,761 vs 18,401!)
+  ✓ 83.4% MORE URBANIZED (74.2% vs 40.5%)
+  ✓ Have LOWER urban-rural inequality (2.41 vs 3.03)
+
+INTERPRETATION:
+  → Treatment (land coupon adoption) is NOT RANDOM
+  → Selection on observables: More developed/urbanized areas did NOT adopt
+  → Policy may target less developed areas that need it more
+  → Or: developed areas don't need the policy (less rural land pressure)
+  → CAUSAL INFERENCE CHALLENGE: Need to account for this pre-treatment imbalance
+
+METHODOLOGICAL IMPLICATIONS:
+  • Cannot assume treatment is exogenous
+  • Difference-in-differences (DiD) assumption: parallel trends may not hold
+  • Need to check pre-treatment trends for treated vs control group
+  • Consider: propensity score matching, covariate balancing, or other weighting
+  • Treated group = typically poorer, more rural areas with greater income inequality
+
+================================================================================
+7. CHENGDU: VARIABLE AVAILABILITY & PANEL STRUCTURE
+================================================================================
+
+VARIABLE COMPARISON WITH CHONGQING:
+✓ Has urban income (mu_u) - partially available (59.4%)
+✓ Has rural income (mu_r) - partially available (70.6%)
+✗ Missing urbanization_rate - NO DATA (0% complete)
+✓ Has GDP per capita (gdp_pc) - fully available (100%)
+✓ Has population (total_pop_registered) - mostly available (86.9%)
+✓ Has treatment indicators - fully available (100%)
+★ MUST COMPUTE: income_ratio = mu_u / mu_r
+
+PANEL STRUCTURE:
+✓ PERFECTLY BALANCED: 20 counties × 16 years = 320 observations
+  - No unbalanced panel issues
+  - Can use standard DiD estimators
+  - Ideal for fixed effects estimation
+
+HISTORICAL ADVANTAGE:
+✓ Earlier data starts in 2005 (vs Chongqing's 2009)
+✓ Covers 16 years (vs Chongqing's 12 years)
+✓ Better for identifying pre-treatment trends
+
+DATA QUALITY ISSUES:
+✗ mu_u and mu_r have significant missingness (40-30% missing)
+✗ Urbanization rate completely missing
+✗ Some economic variables have partial missingness
+✓ Overall more sparse than Chongqing but good balance
+
+================================================================================
+8. SUMMARY TABLE: ALL COUNTIES IN BASELINE (2009)
+================================================================================
+
+CHONGQING 2009 BASELINE CHARACTERISTICS (n=37 counties):
+
+Never-Treated Counties (n=6):
+│ County      │ mu_u  │ mu_r │ Ratio │ GDP pc │ Urban% │ Pop (10k) │
+├─────────────┼───────┼──────┼───────┼────────┼────────┼───────────┤
+│ 南岸区      │17,210 │7,955 │ 2.16  │ 42,307 │ 89.16  │   58.37   │
+│ 大渡口区    │17,183 │7,612 │ 2.26  │ 54,446 │ 92.76  │   23.27   │
+│ 大足区      │14,697 │5,604 │ 2.62  │ 15,432 │ 36.09  │   96.00   │
+│ 江北区      │17,263 │7,444 │ 2.32  │ 47,051 │ 88.63  │   53.54   │
+│ 沙坪坝区    │17,361 │7,421 │ 2.34  │ 38,286 │ 88.22  │   76.70   │
+│ 长寿区      │14,927 │5,437 │ 2.75  │ 23,043 │ 50.55  │   90.10   │
+├─────────────┼───────┼──────┼───────┼────────┼────────┼───────────┤
+│ MEAN        │16,440 │6,912 │ 2.41  │ 36,761 │ 74.24  │   66.33   │
+│ STD         │ 1,265 │1,096 │ 0.23  │ 14,798 │ 24.43  │   26.96   │
+
+Sample of Treated Counties (showing range, n=31):
+Richest:  九龙坡区    (17,210 urban, 49,916 GDP pc, 84% urban)
+Poorest:  城口县      (11,053 urban, 11,081 GDP pc, 22% urban)
+
+================================================================================
+9. DATA QUALITY SUMMARY
+================================================================================
+
+CHENGDU DATA COMPLETENESS:
+  Excellent (≥90%): county_id, year, city, county_name, ticket_cum, ticket_area,
+                     land_coupon_transaction_binary, after_first_land_coupon_transaction,
+                     GDP_total, GDP components, gdp_pc, fiscal variables, retail sales,
+                     real estate investment, schools, students, teachers
+  
+  Good (70-89%):    total_pop_registered (86.9%), rural_employment (68.8%),
+                     Year-end Balance Loans (81.9%), agriculture output (81.2%),
+                     industrial enterprises (82.5%), hospital beds (82.5%)
+  
+  Moderate (30-69%): mu_u (59.4%), mu_r (70.6%), total_deposit (67.8%),
+                      Number of Village Committees (32.5%), household_num (32.5%)
+  
+  Poor (<30%):       城镇化率 (0%), 城镇单位职工平均工资 (31.9%), physicians (6.2%),
+                     crop sown area (12.5%)
+
+CHONGQING DATA COMPLETENESS:
+  Excellent (≥95%): Almost all variables including core economic indicators
+  
+  Good (80-94%):     Industrial enterprises (80.2%), Oilseed output (94.6%),
+                      Real estate investment (99.1%), village committees (99.5%)
+  
+  Acceptable (90-100%): Social welfare institutions (90.1%)
+  
+  Overall: MUCH CLEANER than Chengdu - suitable for econometric analysis
+
+================================================================================
+10. RECOMMENDATIONS FOR ANALYSIS
+================================================================================
+
+FOR CHONGQING ANALYSIS:
+1. Use 6 never-treated counties as control group
+2. Use 31 treated counties as treatment group
+3. MUST adjust for pre-treatment imbalance:
+   - Create matched samples using propensity score
+   - Or: Use weighted DiD with inverse probability weighting
+   - Or: Include baseline characteristics as controls in DiD regression
+4. Check parallel trends assumption by plotting pre-treatment outcomes
+5. Consider that treatment may be "reverse" - policy targets poorer areas
+6. Use balanced panel (2009-2020) for clean estimation
+
+FOR CHENGDU ANALYSIS:
+1. COMPUTE: income_ratio = mu_u / mu_r
+2. Acknowledge: Cannot use urbanization_rate (missing data)
+3. Note: Missing data on mu_u and mu_r limits analysis sample
+4. Advantage: Longer time period (2005-2020) shows pre-2009 trends
+5. Can compare treatment patterns between Chengdu and Chongqing
+6. Perfectly balanced panel is ideal for fixed-effects estimation
+7. Consider subsetting to years with complete data on all key variables
+
+FOR COMPARATIVE ANALYSIS:
+1. Different time periods (Chengdu 2005-2020, Chongqing 2009-2020)
+2. Different geographic regions but same country context
+3. Different treatment incidence: Chengdu and Chongqing vary in adoption
+4. Chongqing has clear selection problem; check if same in Chengdu
+
+================================================================================
+END OF ANALYSIS SUMMARY
+================================================================================

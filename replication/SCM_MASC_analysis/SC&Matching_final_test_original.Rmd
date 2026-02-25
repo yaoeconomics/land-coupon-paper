@@ -1,0 +1,301 @@
+---
+title: "SC&Matching_final_test"
+author: "Zhiyao Ma"
+date: "5/12/2021"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+# 1. Synthetic Control Estimator
+Setting up and importing the packages I will use.
+```{r setup}
+library(Synth)
+library(readxl)
+library(ggplot2)
+library(Matching)
+SCM_test <- read_excel("SCM_test.xlsx")
+SCM <- SCM_test
+SCM$income_ratio <- SCM$a/SCM$f   ## 可支配性收入之比
+SCM$finance <- SCM$cc/SCM$w  ## 金融业GDP占比
+SCM <- as.data.frame(SCM)
+rm(SCM_test)
+# set up treatment year (for All calculation)
+treated_year <- 2008
+
+# 加入的控制变量list
+SCpredictors <- c("a","d","f","i","s","t","ee","ff","hh","finance")
+
+# set up 1-to-m MATCHING estimator(for Matching calculation)
+m <- 5
+
+# pick a cutoff value $f^*$, defining $F$ to include all $f \geq f^*$ in the pre-treatment period. (for MASC calculation)
+cutoff_f <- 2001
+```
+
+```{r Synthetic Control Estimator}
+## synth on 可支配性收入之比
+
+dataprep.out <-dataprep(
+  foo = SCM,predictors=SCpredictors
+  ,predictors.op = c("mean")
+  ,dependent     = c("income_ratio") 
+  ,unit.variable = c("code")
+  ,time.variable = c("Year")
+  ,special.predictors = list(list("income_ratio",2001,"mean"),
+                             list("income_ratio",2007,"mean"))
+  ,treatment.identifier  = 22
+  ,controls.identifier   = c(1:21,24:31)
+  ,time.predictors.prior = c(2000:(treated_year-1))
+  ,time.optimize.ssr     = c(2000:(treated_year-1))
+  ,unit.names.variable   = c("Region")
+  ,time.plot            = c(2000:2019) 
+  )
+
+synth.out <- synth(data.prep.obj = dataprep.out)
+
+synth.tables <- synth.tab(
+  dataprep.res = dataprep.out,
+  synth.res = synth.out
+) 
+
+write.csv(synth.tables$tab.pred, file = "predictor_fit_raw.csv")
+write.csv(synth.tables$tab.w, file = "weight_raw.csv")
+
+# export Weights matrix of the SC estimator
+SC_results_table_raw <- as.data.frame(synth.tables$tab.w)
+SC_results_table <- subset(SC_results_table_raw, SC_results_table_raw$w.weights!=0)
+
+colnames(SC_results_table) <- c("Weights","Matched_Units","Unit_index")
+# Delete useless values in R
+rm(SC_results_table_raw,dataprep.out)
+```
+
+
+# 2. Matching Estimator
+To apply the package "Matching", I munipulated the original dataset, deleting the previous column "Year" and transforming all chronical data into more columns. \\
+
+```{r Matching estimator}
+# Matching estimator practicing
+
+# 根据SC estimator中我们选择control variables，create a new （总表）dataframe consisting of only those variables.
+matching_total <- SCM[,c("Year",SCpredictors)]
+matching_total_beforeTreated <- subset(matching_total,matching_total$Year < treated_year)
+
+# 把数据(删掉Year变量)按照年份划分成多个子集，储存在list中
+matching_split_list <- split(matching_total_beforeTreated[,-1],matching_total_beforeTreated$Year)
+
+# 把list中各年的数据横向拼在一起
+matching_test <- do.call("cbind",matching_split_list)
+
+# 把national total这个obs去掉
+matching_test <- matching_test[-1,]
+
+# create the "treat" variable (给重庆赋值为1)
+matching_test$treat <- 0
+matching_test$treat[22]<-1
+
+#save data objects
+X <- matching_test
+Tr <- matching_test$treat
+#
+# one-to-m matching with replacement (the "M=m" option).
+# Estimating the treatment effect on the treated (the "estimand" option defaults to ATT).
+rr <- Match(Tr=Tr, X=X, M=m,ties = FALSE,replace = TRUE)
+# summary of the results from matching
+summary.Match(rr)
+
+matched_weights <- rr$weights
+
+
+
+# creating an empty list showing the names of matched regions explicitly
+matched_unit_index <- rr$index.control
+province_list <- c("Beijing","Tianjin","Hebei","Shanxi","Inner Mongolia","Liaoning","Jilin","Heilongjlang","Shanghai","Jiangsu","Zhejian","Anhui","Fujian","Jiangxi","Shandong","Henan","Hubei","Hunan","Guangdong",
+"Guangxi","Hainan","Chongqing","Sichuan","Guizhou","Yunnan","Tibet",
+"Shaanxi","Gansu","Qinghai","Ningxia","Xinjiang")
+
+matched_unit_names<-seq_len(0)
+for(i in 1:length(matched_unit_index)){
+    matched_unit_names<-c(matched_unit_names,province_list[matched_unit_index[i]]) 
+}
+match_results_table <- data.frame(matched_weights,matched_unit_names,matched_unit_index)
+colnames(match_results_table) <- c("Weights","Matched_Units","Unit_index")
+
+# Delete useless values in R
+rm(province_list,Tr,X,matched_weights,matched_unit_index,matched_unit_names,i,matching_test,matching_total,matching_total_beforeTreated,matching_split_list,rr)
+```
+
+
+
+# 3. MASC Estimator
+Let's first calculate the true y, SC y, and Matching y values. 
+
+```{r 各种estimator整合} 
+# Extract the true y values.
+True_y <- subset(SCM$income_ratio, SCM$code 
+                          %in% 22)
+
+# calculate the SC estimator' y values.
+SCtmp_list <- list()
+for (i in 1:length(SC_results_table$Weights)){
+  province_data <- subset(SCM$income_ratio, SCM$code 
+                          %in% SC_results_table$Unit_index[i])
+  province_weight <- SC_results_table$Weights[i]
+  province_Weighted_Dependent <- province_data * province_weight
+  SCtmp_list[[i]] <- province_Weighted_Dependent
+}
+  ## naming the tmp_list
+  names(SCtmp_list) <- SC_results_table$Matched_Units
+
+  ## sum up the provinces' y values
+  SC_y <- integer(length(SCtmp_list[[1]])) # create a sequence of zeros with length equalling to length of the list elements
+  for (i in 1:length(SCtmp_list)){
+    SC_y <-SC_y + SCtmp_list[[i]]
+  }
+  
+# calculate the MATCHING estimator' y values.
+  Mtmp_list <- list()
+for (i in 1:length(match_results_table$Weights)){
+  province_data <- subset(SCM$income_ratio, SCM$code 
+                          %in% match_results_table$Unit_index[i])
+  province_weight <- match_results_table$Weights[i]
+  province_Weighted_Dependent <- province_data * province_weight
+  Mtmp_list[[i]] <- province_Weighted_Dependent
+}
+  ## naming the tmp_list
+  names(Mtmp_list) <- match_results_table$Matched_Units
+
+  ## sum up the provinces' y values
+  M_y <- integer(length(Mtmp_list[[1]])) # create a sequence of zeros with length equalling to length of the list elements
+  for (i in 1:length(Mtmp_list)){
+    M_y <-M_y + Mtmp_list[[i]]
+  }
+
+# create a table containing all y values, including true y, SC, and matching estimators.
+  final_year <- subset(SCM$Year, SCM$code 
+                          %in% match_results_table$Unit_index[1])
+  Final_y_values <- data.frame(final_year,True_y,SC_y,M_y)
+  
+# Delete useless values in R
+  rm(Mtmp_list,SCtmp_list,final_year,i,M_y,province_data,province_weight,province_Weighted_Dependent,SC_y,True_y)
+```
+
+
+
+Let's calculate Phi based on the formula derived in the paper now.
+$$
+\phi^{*}(m)=\frac{\sum_{f \in \mathcal{F}}\left(\hat{\mu}_{f+1}^{m a}(m)-\hat{\mu}_{f+1}^{s c}\right)\left(y_{1, f+1}-\hat{\mu}_{f+1}^{s c}\right)}{\sum_{f \in \mathcal{F}}\left(\hat{\mu}_{f+1}^{m a}(m)-\hat{\mu}_{f+1}^{s c}\right)^{2}}
+$$
+
+```{r Phi Calculation STEP 1}
+
+# apply the formula of Phi in the compulation note
+numerator_sum <- 0
+denominator_sum <- 0
+
+for (i in (cutoff_f+1):(treated_year-1)){
+  ma <- subset(Final_y_values$M_y,Final_y_values$final_year %in% i)
+  sc <- subset(Final_y_values$SC_y,Final_y_values$final_year %in% i)
+  true <- subset(Final_y_values$True_y,Final_y_values$final_year %in% i)
+  numerator_sum <- numerator_sum + (ma-sc)*(true-sc)
+  denominator_sum <-denominator_sum + (ma-sc)^2
+}
+
+phi <- numerator_sum/denominator_sum
+
+# 根据条件判断
+if (phi < 0){phi <- 0}
+if (phi > 1){phi <- 1}
+
+print(phi)
+
+# Delete useless values in R
+rm(denominator_sum,numerator_sum,i,ma,sc,true)
+```
+
+
+根据公式，计算MASC and Q associated with this Phi
+$$
+\hat{\mu}_{t}^{\operatorname{masc}}(\phi, m) \equiv \phi \hat{\mu}_{t}^{m a}(m)+(1-\phi) \hat{\mu}_{t}^{s c}
+$$
+
+$$
+Q(\phi, m)=\frac{1}{|\mathcal{F}|} \sum_{f \in \mathcal{F}}\left(y_{1, f+1}-\hat{\mu}_{f+1}^{m a s c}(\phi, m)\right)^{2}
+$$
+```{r Phi Calculation STEP 2}
+# 根据Phi值，计算出MASC的y values，并储存在table中
+Final_y_values$MASC_y <- phi * Final_y_values$M_y + (1-phi) * Final_y_values$SC_y
+
+Q <- 0
+for (i in (cutoff_f+1):(treated_year-1)){
+  masc <- subset(Final_y_values$MASC_y,Final_y_values$final_year %in% i)
+  true <- subset(Final_y_values$True_y,Final_y_values$final_year %in% i)
+  Q <- Q + (true-masc)^2
+}
+Q <- Q/((treated_year-1)-cutoff_f)
+
+print(Q)
+
+# Delete useless values in R
+rm(masc,true,i)
+```
+
+
+```{r Q values and Results comparison}
+# 1. cutoff year = 2001, m=1, phi=0.002366, Q=0.01451413
+# 2. cutoff year = 2001, m=2, phi=0.009213, Q=0.01451751
+# 3. cutoff year = 2001, m=5, phi=0.002652, Q=0.01451467
+
+# 1. cutoff year = 2003, m=1, phi=0.008260, Q=0.01976813
+# 2. cutoff year = 2003, m=2, phi=0.007320, Q=0.01978951
+# 3. cutoff year = 2003, m=5, phi=0.009130, Q=0.01977627
+```
+
+```{r plot the results}
+vd = rbind(data.frame(v=Final_y_values$final_year, y=Final_y_values$True_y, type=as.factor("Real Chongqing")), 
+           data.frame(v=Final_y_values$final_year, y=Final_y_values$SC_y, type=as.factor("SC")),
+           data.frame(v=Final_y_values$final_year, y=Final_y_values$M_y, type=as.factor("Matching")),
+           data.frame(v=Final_y_values$final_year, y=Final_y_values$MASC_y, type=as.factor("MASC")))
+
+myplot <- ggplot(vd,aes(x=v,y=y,shape=type,color=type))+geom_point()+labs(title="Estimators' Predicted Values")+xlab("year")+ylab("Urban-Rural Disposable Income Ratio")+scale_shape_manual(values=c(1,2,7,8))+scale_color_manual(values=c(1,4,3,2))+theme(plot.title=element_text(hjust=0.5))+geom_line()+ geom_vline(aes(xintercept=treated_year), colour="#BB0000", linetype="dashed")
+
+myplot
+
+ggsave(myplot,filename = "Plots_Results_comparison.pdf",width = 12,height = 9, dpi = 320)
+```
+
+```{r parameter displaying}
+# displaying parameters and results
+parameter_name <- c("treatment year","m for Matching","cutoff f for MASC","Phi","Q")
+parameter_value <- c(treated_year, m, cutoff_f, phi ,Q)
+parameter_value <- as.character(parameter_value)
+
+input_output <- data.frame(parameter_name,parameter_value)
+
+```
+### displaying parameters and results
+```{r echo=FALSE,results='asis'}
+library(knitr)
+kable(input_output,caption = "parameters and results")
+```
+
+### SC estimator component
+```{r echo=FALSE,results='asis'}
+library(knitr)
+kable(SC_results_table,caption = "Results Table of Synthetic Control")
+```
+
+### MATCHING estimator component
+```{r echo=FALSE,results='asis'}
+library(knitr)
+kable(match_results_table,caption = "Results Table of Matching")
+```
+
+### Values of Dependent variable with all estimators
+```{r echo=FALSE,results='asis'}
+library(knitr)
+kable(Final_y_values,caption = "Final Results Table")
+write.csv(Final_y_values, "all_estimators_dependent_variable.csv")
+```
+

@@ -1,0 +1,281 @@
+---
+title: "theil_analysis_Chongqing"
+author: "Yao Ma"
+date: "2025-08-19"
+output: html_document
+---
+
+```{r, warning=FALSE}
+# ============================
+# Chongqing UR Theil Decomposition
+# Author: Zhiyao Ma
+# ============================
+
+# Packages
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(broom)
+library(scales)
+library(data.table)
+library(readxl)
+
+
+df <- read_excel("Chongqing.xlsx")
+```
+
+
+
+```{r}
+
+# 0) 读入数据 ---------------------------------------------------------------
+# df <- readr::read_csv("your_chongqing_panel.csv")
+# 需要列: county_id, year, mu_u, mu_r, N_u, N_r
+# 假设 df 已在环境中；以下做基本清洗：
+
+df <- df %>%
+  mutate(
+    N = N_u + N_r,
+    mu = (N_u * mu_u + N_r * mu_r) / pmax(N, 1e-9)  # 县总人均
+  ) %>%
+  filter(year >= 2009, year <= 2020) %>%
+  group_by(year) %>%
+  filter(all(!is.na(mu_u), !is.na(mu_r), !is.na(N_u), !is.na(N_r))) %>%
+  ungroup()
+
+# 可选：winsorize（避免极端值影响，发表版可放附录）
+winsor <- function(x, probs=c(0.01,0.99)) {
+  qs <- quantile(x, probs=probs, na.rm=TRUE)
+  pmin(pmax(x, qs[[1]]), qs[[2]])
+}
+df <- df %>%
+  group_by(year) %>%
+  mutate(
+    mu_u = winsor(mu_u),
+    mu_r = winsor(mu_r)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    N = N_u + N_r,
+    mu = (N_u * mu_u + N_r * mu_r) / pmax(N, 1e-9)
+  )
+
+# 1) 年度层面：Theil 分解（严格版）-------------------------------------------
+# 定义一个函数：输入某一年数据，输出 T_within, T_between, T_total
+theil_decompose_one_year <- function(d_year) {
+  # d_year: data frame for a single year, cols: county_id, mu_u, mu_r, N_u, N_r, N, mu
+  
+  # 重庆总体：总人口与总收入、人均
+  total_pop <- sum(d_year$N, na.rm=TRUE)
+  total_income <- sum(d_year$N * d_year$mu, na.rm=TRUE)
+  mu_city <- total_income / pmax(total_pop, 1e-9)
+  
+  # 县级收入份额权重 w_i = (N_i * mu_i) / sum_j (N_j * mu_j)
+  w_income <- (d_year$N * d_year$mu) / pmax(total_income, 1e-9)
+  
+  # 县内城乡两组在县内的收入份额
+  v_u <- (d_year$N_u * d_year$mu_u) / pmax(d_year$N * d_year$mu, 1e-9)
+  v_r <- (d_year$N_r * d_year$mu_r) / pmax(d_year$N * d_year$mu, 1e-9)
+  
+  # 县内（城乡）Theil：T_UR_i = v_u * ln(mu_u/mu_i) + v_r * ln(mu_r/mu_i)
+  T_UR_i <- v_u * log(pmax(d_year$mu_u,1e-12) / pmax(d_year$mu,1e-12)) +
+            v_r * log(pmax(d_year$mu_r,1e-12) / pmax(d_year$mu,1e-12))
+  
+  # 聚合得到：Within = sum_i w_i * T_UR_i
+  T_within <- sum(w_income * T_UR_i, na.rm=TRUE)
+  
+  # 县际（between）= sum_i w_i * ln(mu_i / mu_city)
+  T_between <- sum(w_income * log(pmax(d_year$mu,1e-12) / pmax(mu_city,1e-12)), na.rm=TRUE)
+  
+  # 总量 = within + between （数值恒等）
+  T_total <- T_within + T_between
+  
+  tibble(
+    year = unique(d_year$year),
+    T_within = T_within,
+    T_between = T_between,
+    T_total = T_total,
+    mu_city = mu_city,
+    total_pop = total_pop,
+    total_income = total_income
+  )
+}
+
+theil_yearly <- df %>%
+  group_split(year) %>%
+  map_dfr(theil_decompose_one_year)
+
+# 2) 区间贡献（2009→2020）与阶段分解 ---------------------------------------
+anchor_start <- 2009
+anchor_end   <- 2020
+
+get_level <- function(tbl, y, var) {
+  tbl %>% filter(year == y) %>% pull({{var}})
+}
+
+delta_tbl <- tibble(
+  component = c("Within","Between","Total"),
+  delta = c(get_level(theil_yearly, anchor_end, T_within) - get_level(theil_yearly, anchor_start, T_within),
+            get_level(theil_yearly, anchor_end, T_between) - get_level(theil_yearly, anchor_start, T_between),
+            get_level(theil_yearly, anchor_end, T_total)   - get_level(theil_yearly, anchor_start, T_total))
+) %>%
+  mutate(share = delta / delta[component=="Total"])
+
+print(delta_tbl)
+# 解释口径：2009–2020 总体 Theil 变化中，within 的贡献份额 = share[Within]，between 同理。
+
+# 可选：阶段性（示例三段）
+cuts <- list(c(2009,2012), c(2013,2016), c(2017,2020))
+phase_tbl <- map_dfr(cuts, function(p) {
+  tibble(
+    phase = paste0(p[1],"-",p[2]),
+    d_within = get_level(theil_yearly, p[2], T_within) - get_level(theil_yearly, p[1], T_within),
+    d_between= get_level(theil_yearly, p[2], T_between) - get_level(theil_yearly, p[1], T_between),
+    d_total  = get_level(theil_yearly, p[2], T_total)   - get_level(theil_yearly, p[1], T_total)
+  ) %>% mutate(share_within = d_within/d_total, share_between = d_between/d_total)
+})
+print(phase_tbl)
+
+# 3) 县层块自助（cluster bootstrap by county）置信区间 -----------------------
+set.seed(123)
+B <- 1000  # 发表可设 1000–2000
+counties <- unique(df$county_id)
+nC <- length(counties)
+
+bootstrap_one <- function() {
+  # 重抽县集合（有放回），保留其全时序
+  sampled <- sample(counties, size = nC, replace = TRUE)
+  d_b <- df %>% semi_join(tibble(county_id=sampled), by="county_id")
+  
+  # 年度分解
+  theil_b <- d_b %>% group_split(year) %>% map_dfr(theil_decompose_one_year)
+  
+  tibble(
+    d_within = get_level(theil_b, anchor_end, T_within) - get_level(theil_b, anchor_start, T_within),
+    d_between= get_level(theil_b, anchor_end, T_between) - get_level(theil_b, anchor_start, T_between),
+    d_total  = get_level(theil_b, anchor_end, T_total)   - get_level(theil_b, anchor_start, T_total)
+  )
+}
+
+boot_res <- map_dfr(1:B, ~bootstrap_one())
+
+ci_tbl <- boot_res %>%
+  summarise(
+    d_within_lo = quantile(d_within, 0.05, na.rm=TRUE),
+    d_within_hi = quantile(d_within, 0.95, na.rm=TRUE),
+    d_between_lo= quantile(d_between,0.05, na.rm=TRUE),
+    d_between_hi= quantile(d_between,0.95, na.rm=TRUE),
+    d_total_lo  = quantile(d_total,  0.05, na.rm=TRUE),
+    d_total_hi  = quantile(d_total,  0.95, na.rm=TRUE)
+  )
+print(ci_tbl)
+
+# 4) 图表：堆叠趋势（主文）+ 变化贡献（附图） -------------------------------
+plot_df <- theil_yearly %>%
+  select(year, T_within, T_between) %>%
+  pivot_longer(-year, names_to="component", values_to="value") %>%
+  mutate(component = factor(component, levels=c("T_within","T_between"),
+                           labels=c("within counties","across counties")))
+
+p1 <- ggplot(plot_df, aes(x=year, y=value, fill=component)) +
+  geom_area(alpha=0.85, position="stack") +
+  labs(x=NULL, y="GE(1) (Theil)", fill=NULL) +
+  scale_x_continuous(breaks=seq(2009,2020,2)) +
+  scale_y_continuous(labels=number_format(accuracy=0.001)) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position="top")
+print(p1)
+ggsave("theil_decomposition_over_years.png", p1, width=7, height=5, dpi=300)
+
+# 变化条形图（2009→2020）
+delta_long <- delta_tbl %>%
+  mutate(component = factor(component, levels=c("Within","Between","Total"))) %>%
+  filter(component != "Total")
+
+p2 <- ggplot(delta_long, aes(x=component, y=delta, fill=component)) +
+  geom_col(width=0.6) +
+  geom_hline(yintercept = 0, linewidth=0.4) +
+  labs(x=NULL, y="Change in Theil (2009→2020)",
+       title="Contribution to the decline in inequality (2009→2020)") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position="none")
+print(p2)
+
+ggsave("theil_decline_contribution.png", p2, width=7, height=5, dpi=300)
+# 可选：把 bootstrap 的年度曲线也做出来（高级玩法：年内 block bootstrap）
+# 这里略；主文展示按年分解与区间贡献足够。
+
+# 5) 导出结果表（可直接进论文附录） ----------------------------------------
+readr::write_csv(theil_yearly, "theil_decomposition_chongqing_2009_2020.csv")
+readr::write_csv(delta_tbl,   "theil_changes_2009_2020.csv")
+readr::write_csv(phase_tbl,   "theil_phase_contributions.csv")
+readr::write_csv(boot_res,    "theil_boot_cluster_results.csv")
+readr::write_csv(ci_tbl,      "theil_boot_cluster_CI.csv")
+
+
+```
+```{r}
+# ===============================
+# Bootstrap 年度曲线 (within / between / total)
+# ===============================
+
+set.seed(123)
+B <- 100   # 建议 ≥500; 发表用 1000–2000
+counties <- unique(df$county_id)
+nC <- length(counties)
+years <- sort(unique(df$year))
+
+# 定义函数：对一次bootstrap样本，输出每年的三项分解
+bootstrap_curve_one <- function() {
+  sampled <- sample(counties, size = nC, replace = TRUE)
+  d_b <- df %>% semi_join(tibble(county_id=sampled), by="county_id")
+  
+  theil_b <- d_b %>% group_split(year) %>% map_dfr(theil_decompose_one_year)
+  theil_b %>% select(year, T_within, T_between, T_total)
+}
+
+# 批量重复
+boot_curves <- map(1:B, ~bootstrap_curve_one(), .progress=TRUE)
+boot_all <- bind_rows(boot_curves, .id="rep")
+
+# 计算每年置信区间 (5%–95%)
+boot_ci <- boot_all %>%
+  pivot_longer(cols=c(T_within, T_between, T_total),
+               names_to="component", values_to="value") %>%
+  group_by(year, component) %>%
+  summarise(
+    lo = quantile(value, 0.05, na.rm=TRUE),
+    hi = quantile(value, 0.95, na.rm=TRUE),
+    .groups="drop"
+  )
+
+# 合并点估计 (theil_yearly) 与区间
+plot_df2 <- theil_yearly %>%
+  pivot_longer(cols=c(T_within, T_between, T_total),
+               names_to="component", values_to="estimate") %>%
+  left_join(boot_ci, by=c("year","component"))
+
+# ===============================
+# 作图：年度曲线 + 置信带
+# ===============================
+p3 <- ggplot(plot_df2, aes(x=year, y=estimate, color=component, fill=component)) +
+  geom_line(size=1) +
+  geom_ribbon(aes(ymin=lo, ymax=hi), alpha=0.2, color=NA) +
+  labs(x=NULL, y="GE(1) (Theil)",
+       title="Theil Decomposition in Chongqing (2009–2020)",
+       subtitle="Point estimate with 90% cluster-bootstrap confidence bands",
+       color=NULL, fill=NULL) +
+  scale_x_continuous(breaks=seq(min(years), max(years), 2)) +
+  theme_minimal(base_size=12) +
+  theme(legend.position="top")
+
+print(p3)
+
+# 保存图像
+ggsave("theil_bootstrap_curve.png", p3, width=7, height=5, dpi=300)
+
+
+```
+
+

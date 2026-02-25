@@ -1,0 +1,601 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{amsmath,amssymb,booktabs,threeparttable,hyperref,multirow}
+\usepackage[figuresright]{rotating}
+\usepackage{natbib}
+\usepackage{tabularx}
+\usepackage{subcaption}
+% bbm not available; define indicator function manually
+\newcommand{\mathbbm}[1]{\mathbb{#1}}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{url}
+
+\begin{document}
+
+\pagenumbering{gobble} % stop the page-number count
+
+% ----- title -----
+\begin{center}
+{\LARGE \bfseries
+Transferable Development Rights and the Urban–Rural Income Divide: Evidence from China's Land Coupon program \par}
+\vspace{1em}
+
+{\large
+Zhiyao Ma\textsuperscript{1}, Richard J. Sexton\textsuperscript{1}, and Zhen Zhong\textsuperscript{2}
+\par}
+\vspace{1em}
+
+{\small
+\textsuperscript{1}University of California, Davis \\
+\textsuperscript{2}Renmin University of China
+}
+\end{center}
+
+% ----- Abstract -----
+\begin{abstract}
+Inefficient land allocation between rural and urban areas remains a structural challenge in China, reinforced by rigid land-use regulations and sustained rural outmigration. In 2008, the central government authorized Chongqing to pilot the Land Coupon program (LCP), a market-based transferable development rights mechanism that allows rural construction quotas to be traded for urban expansion. This paper examines whether the LCP reduced the urban--rural income divide and through what channels. Exploiting staggered county-level adoption across 37 counties between 2009 and 2017, we apply heterogeneity-robust doubly robust and interaction-weighted estimators alongside supplementary provincial-level synthetic control analysis. We show that the LCP lowered Chongqing's urban--rural income ratio by 0.21 on average, with the effect growing monotonically to $-0.29$ after nine years. County-level decompositions reveal that most convergence occurred within counties, driven by rising rural incomes rather than falling urban incomes, and by cumulative rather than annual transactions---consistent with the lumpy, one-time nature of land coupon revenues. Participation was correlated with baseline disadvantage: poorer, more rural, and more unequal counties adopted earlier and traded more intensively. Beyond direct transfers, multiplier analysis suggests that the infusion of land coupon revenues into rural households and collectives amplified local economic impacts. Our findings demonstrate that the LCP reduced inequality in a progressive and compounding manner, highlighting the broader potential of carefully designed, government-facilitated market mechanisms to promote inclusive growth and reduce spatial inequality in economies where private landholding is constrained.
+
+\noindent \textbf{JEL Classifications:} O18, Q15, R38
+\end{abstract}
+
+
+\noindent \textbf{Highlights:}
+\begin{itemize}
+    \item Land coupon trading reduces urban--rural income ratio by 0.29 after nine years.
+    \item Convergence is driven by rising rural incomes; urban incomes are unaffected.
+    \item Cumulative transactions, not annual flows, drive the narrowing effect.
+    \item Poorer and more unequal counties adopted earlier and traded more intensively.
+    \item Market-based land reform narrows spatial inequality under collective tenure.
+\end{itemize}
+
+
+
+\doublespacing  % double-space entire document
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\section{Introduction}
+\noindent
+Land tenure institutions vary widely across economic systems, from private freehold in market economies to state and collective ownership in socialist systems and community-based customary tenure in much of the developing world. China's land system is distinctive even among these: all urban land is owned by the state and all rural land is owned collectively, with rural households granted long-term use rights but not the ability to freely sell or convert land for urban purposes. This dual system has created a structural barrier: as cities expand, rural construction land (such as homestead plots) cannot easily be redeveloped for non-agricultural uses, while urban governments face mounting demand for new development land \citep{zhou2023cultivated}.
+
+To address this tension, Chongqing, one of the four direct-administered municipalities under the China Central Government,\footnote{Chongqing is one of China's four centrally administered municipalities (alongside Beijing, Shanghai, and Tianjin), enjoying the same administrative rank as a province. The Chongqing municipality governs 38 county-level units, including districts, counties, and county-level cities.} introduced the Land Coupon program (LCP) in 2008 \citep{chen2020dipiao}. Under this program, rural households who voluntarily demolish their old housing plots or idle construction land and restore the land to farmland receive tradable ``land coupons.'' These coupons represent newly created urban development quotas that developers or local governments can purchase in order to secure approval for construction projects within designated urban areas. Market-oriented transactions take place through the Chongqing Country Land Exchange (CCLE), with revenues shared between farmers, village collectives, and local governments. In essence, unlike the bilateral, government-to-government quota transfers seen elsewhere (e.g., Zhejiang Province, as discussed in \citep{Chau568}), the LCP established a centralized and transparent market for trading development rights between rural and urban areas. This mechanism allowed rural households and rural communities to monetize previously illiquid land rights while providing urban developers with access to scarce construction quotas.
+
+The challenge of reconciling rural land preservation with urban growth is not unique to China. TDR programs have been adopted in the United States, Germany, Italy, Brazil, and France to incentivize farmland protection while accommodating urban expansion \citep{Chau568, koetter2021cooperative, micelli2002development, falco2018transfer, ondetti2016social, kassis2021rethinking}. Against this backdrop, the central question of this paper is whether such institutional innovation can mitigate spatial inequality in a transitional economy. In China, urban--rural income disparities remain the dominant source of national inequality \citep{yao1999economic}, and land policies that redirect income flows across space hold substantial redistributive potential. Between 2008 and 2018, farmers earned over 45 billion RMB from land coupon transactions, with collectives receiving an additional 16 billion RMB \citep{jiegouxinggaige}. Yet the distributional effects are unclear ex ante: the efficiency gains from land marketization could accrue disproportionately to urban actors \citep{mi2020}, underscoring the need for rigorous empirical evaluation.
+
+This paper provides causal estimates of the LCP's effect on regional income inequality, with a focus on Chongqing, the only Chinese provincial-level area to sustain an active land coupon market over a full decade. Our empirical strategy exploits the staggered adoption of land coupon trading across Chongqing's 37 counties. Different counties entered the land coupon market at different times between 2009 and 2017, creating quasi-experimental variation in treatment timing. Our preferred estimator is the heterogeneity-robust doubly robust estimator of \citet{callaway2021difference}, which addresses the well-documented biases of two-way fixed effects (TWFE) under treatment-effect heterogeneity in staggered settings \citep{goodman2021difference, sun2021estimating, de2020two}. We supplement this with the interaction-weighted estimator of \citet{sun2021estimating} and report conventional TWFE results as a benchmark. All estimators compare the urban--rural income ratio in treated counties before and after their first transaction against the trajectories of counties that had not yet adopted or never adopted. This within-Chongqing design has a critical advantage: province-wide confounders---the 2008 global financial crisis and China's fiscal stimulus, the Wenchuan earthquake and subsequent reconstruction spending, the ``Lewis turning point'' in labor markets \citep{lewis1954economic, cai2010demographic}, and concurrent national urban--rural equalization policies---are absorbed by year fixed effects and cannot bias the estimates.
+
+Our analysis reveals three key findings. First, pre-treatment coefficients are small and statistically insignificant across all pre-adoption periods in both the CS and Sun--Abraham specifications, validating the parallel-trends assumption that underpins the design. Second, the treatment effect is immediate, statistically significant, and grows monotonically: the CS doubly robust dynamic ATT is $-0.209$ ($p < 0.001$), with the income ratio falling by 0.05 at adoption and reaching $-0.29$ after nine years. The Sun--Abraham interaction-weighted estimator yields a concordant dynamic ATT of $-0.222$ ($-0.193$ with time-varying controls), and a conventional TWFE event study traces the same monotonic decline. Third, the income-channel decomposition shows that the convergence is driven predominantly by rising rural incomes---which increase by 15\% over a decade---while urban incomes show no statistically significant response. These patterns are consistent with a stock rather than flow mechanism: it is the accumulation of land coupon transactions over time, rather than annual trading volumes, that compresses the gap.
+
+We complement this primary analysis with three additional pieces of evidence. First, Theil-index decompositions show that roughly two-thirds of Chongqing's provincial decline in inequality since 2009 is attributable to within-county convergence rather than reweighting across counties. Second, we document that program participation was systematically tilted toward disadvantaged areas: counties with wider baseline income gaps, lower GDP per capita, and more rural populations adopted earlier and traded more intensively. This pattern implies that participation was systematically correlated with baseline disadvantage. Third, we provide supplementary provincial-level evidence using the Synthetic Control Method (SCM) and the Matching and Synthetic Control (MASC) estimator \citep{kellogg_mogstad_pouliot_torgovitsky_2020}, which corroborate an aggregate effect of $-0.3$ to $-0.4$ on Chongqing's income ratio relative to a counterfactual constructed from other provinces.
+
+Direct empirical evidence on the LCP remains thin and mixed. County- and city-level studies link the program to urban--rural integration and structural change, but effects are heterogeneous and sometimes delayed \citep[e.g.,][]{wang2023effects, fuyunying, zhangzhanlu}. \citet{wang2020tdr} use synthetic control methods to conclude that the LCP reduced farmland loss and stimulated economic growth, while other provincial-level designs focused on the income ratio reach conflicting conclusions \citep{yujingwen, xiabo2013}. These studies often cannot disentangle the LCP from contemporaneous policy initiatives or address selection into program participation \citep{li1998tenure, gender_inequality_land_rights, gao2012rental, bruno2023integrating}. Our study advances this literature with a within-province design that addresses the most persistent identification threats---concurrent macro shocks and policy bundling---that have limited prior work.
+
+
+This paper contributes to the economics of land institutions and inequality in three ways. First, it provides the first causal estimates of the LCP's distributional effects using a within-province staggered-adoption design validated by the heterogeneity-robust doubly robust estimator of \citet{callaway2021difference} and the interaction-weighted estimator of \citet{sun2021estimating}. Second, it decomposes the aggregate effect into income channels, showing that convergence is driven by rural income growth and directly validating the asset-monetization mechanism. Third, it extends the inequality literature by identifying how spatially targeted land policies shape income distribution within regions \citep{kuznets2019economic, carter2000, benjamin_brandt_giles_2005, zhao_2020, ceddia2019impact, chakravorty2019land}, evaluating a policy that reallocates development rights across urban and rural jurisdictions at scale.
+
+The findings also carry broader policy relevance. The LCP illustrates how tradable development quotas can reduce urban--rural disparities without altering ownership institutions. This is particularly instructive for countries with communal land tenure, responsible for roughly half of the cross-country agricultural productivity gap \citep{gottlieb2019communal}. In Sub-Saharan Africa and Southeast Asia, collective ownership restricts land transfer and collateralization, hindering rural investment \citep{antonio2019achieving, barajas2024large}. Globally, TDR systems are expanding: inter-city markets have emerged in India \citep{toi2025bengaluru, toi2025gujarat}, regional TDR cooperation has been institutionalized in the United States \citep{pugetTDR2013,boulderTDR2013}, and Chinese provinces are experimenting with quota-transfer schemes.\footnote{Most provincial reforms operate as administratively managed surplus-quota adjustment systems rather than market-based exchanges. See \citet{zj2020adjustment, ah2025indicator, gd2019adjustment, mof2024crossprov}.} The central government is also considering inter-provincial quota transfers \citep{xie2025establishment, StateCouncil2018}.
+
+
+The remainder of the paper is organized as follows. Section 2 introduces the LCP and situates it within the broader context of international TDR schemes. Section 3 reviews patterns of spatial income inequality and outlines the theoretical channels through which the program may affect the urban--rural income gap. Section 4 describes the data, variable construction, and sample design. Section 5 presents the empirical strategy and main results, including Callaway--Sant'Anna and Sun--Abraham estimates, treatment intensity analysis, and robustness checks. Section 6 examines mechanisms, including Theil-index decompositions, income-channel analysis, and selective participation. Section 7 provides supplementary provincial-level evidence using synthetic control methods and multiplier analysis. Section 8 concludes.
+
+
+
+
+%---------------------------%
+
+\section{Land Coupon program and Transferable Development Rights}
+\noindent
+Since 1998, Chinese land policy has required that any conversion of farmland for urban use be offset by reclamation of an equivalent area \citep{ChinaLandBalance1998}. In 2004, this framework was tightened under the ``Bundling of Urban Land Addition with Rural Construction Land Reduction'' (BAR) policy, which links urban expansion directly to rural land consolidation \citep{ChinaIncrementDecrement2006}. The supply of new urban construction land is thus constrained by how much rural land is returned to agricultural use.
+
+A persistent inefficiency has accompanied this framework: despite rural depopulation, rural construction land has continued to expand---a phenomenon known as ``double increase''---because migrant families retain homesteads in their villages after moving to cities \citep{deng2008growth}.\footnote{In China's land system, rural construction land refers to collectively owned village land designated for non-agricultural uses, including farmers' homesteads, rural enterprises, and local public facilities. Unlike urban construction land, which is state-owned and supplied through government auctions, rural construction land cannot normally enter the urban land market directly.} Chongqing, a mountainous and rapidly urbanizing municipality, has faced particularly acute land scarcity and spatial mismatch between development needs and existing land use regulations. In 2008, the central government authorized Chongqing to pilot the Land Coupon program (LCP), establishing the Chongqing Country Land Exchange (CCLE) to manage the issuance, trade, and redemption of tradable land use credits.
+
+A land coupon is issued when rural collective construction land---homesteads, village enterprises, or public-use plots---is voluntarily reclaimed and restored to farmland \citep{ChongqingLandCoupon2015}. The coupon permits its purchaser (typically a developer) to develop an equivalent area in designated urban zones. The transaction process unfolds in three stages (Appendix Figure~\ref{fig:lcp_workflow}): (i) rural residents or collectives voluntarily register land for reclamation;\footnote{The collective cannot register land under certificate to a rural resident without the resident's approval \citep{ChongqingLandCoupon2015}. \cite{han2019transforming} document farmer complaints about the reclamation process, including delayed compensation and inadequate social security for displaced households.} upon certification, the restored farmland generates a land coupon; (ii) the coupon enters the CCLE, where developers and public entities bid for it, with proceeds distributed 85\% to the rural landholder and 15\% to the village collective;\footnote{When rural collective economic organizations reclaim land for public facilities, the net proceeds belong entirely to the collective.} and (iii) the developer redeems the coupon to secure urban construction rights. Unlike bilateral, government-to-government quota transfers seen in other provinces, the LCP operates through a centralized and transparent market with standardized instruments and publicly posted prices. Theoretically, TDR mechanisms can achieve efficient allocations \citep{wolfram1981sale} and redistribute zoning-generated rents more equitably \citep{thorsnes1999letting}; in China's context, \cite{jinxiangmu2010} argued that such programs offer a promising path for reconciling urban expansion with farmland protection.
+
+
+
+
+\section{Spatial Income Inequality and Conceptual Framework}
+\noindent
+Urban--rural income disparities remain the dominant source of national inequality in China. According to the \cite{CDRF2017}, over 50\% of national income inequality in 2016 was attributable to spatial factors, and Theil-index decompositions consistently show that the urban--rural gap accounts for 34--43\% of total income inequality \citep{young2013inequality, wuxudong2019, Tsokhas_poverty_2011}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\textwidth]{China_urban_rural_ratio_figure.png}
+\caption{National Urban--Rural Disposable Income per Capita and Income Ratio, 2005--2020. Bars show urban (blue) and rural (orange) per capita disposable income in thousand RMB (left axis). The line shows the urban--rural income ratio (right axis). The dashed vertical line marks the launch of Chongqing's Land Coupon program in 2008. Data source: National Bureau of Statistics of China.}
+\label{fig:1}
+\end{figure}
+
+Figure~\ref{fig:1} shows that China's national urban--rural income ratio peaked at 3.33 in 2007--2009 and declined steadily to 2.56 by 2020---a drop of 0.77 points. This secular convergence reflects labor migration, agricultural mechanization \citep{deng2006cultivated}, urbanization \citep{deng2015impact}, and national redistributive policies such as rural subsidy programs and minimum livelihood guarantees. Chongqing's trajectory broadly mirrored the national pattern, which means that identifying the LCP's contribution requires separating program-induced narrowing from the baseline decline that would have occurred regardless. A provincial-level comparison cannot accomplish this, because the same macro forces affect both Chongqing and potential control provinces. Our county-level within-Chongqing design addresses this challenge: year fixed effects absorb all province-wide temporal shocks, so that treatment effects capture only the \emph{additional} convergence attributable to land coupon trading within adopting counties.
+
+
+\subsection{Expected Effects and Empirical Predictions}
+\noindent
+The LCP can influence income distribution through several reinforcing channels \citep{WallsMcConnell2007TDR, wang2023effects}. The most direct is asset monetization: households that vacate homestead plots sell the resulting development quota, converting illiquid land entitlements into property income usable for consumption smoothing, human capital investment, or business development \citep{zimmerman2003asset, dong2012effects, daidone2019household, guirkinger2008credit, yi2016cash}. Developers purchasing quotas effectively transfer capital into rural regions through compensation payments. A further 15\% of proceeds flows to village collectives, which can invest in infrastructure, education, or health services, generating multiplier effects. Because the CCLE operates as a centralized municipal exchange, transactions frequently cross county boundaries, but the income effects are registered in the county where the land is reclaimed.
+
+These channels generate three empirical predictions: (i) the urban--rural income ratio should decline within participating counties, with the effect growing as counties accumulate transactions; (ii) the convergence should be driven primarily by rising rural incomes rather than falling urban incomes; and (iii) because the LCP is voluntary, counties with wider baseline disparities and more eligible rural land may find the program more attractive, so that participation is correlated with baseline disadvantage.
+
+
+
+
+\section{Data}\label{sec:data}
+
+\subsection{Data Sources and Panel Construction}
+\noindent
+Our analysis draws on two primary data sources. Income and socioeconomic variables come from the \textit{Chongqing Survey Yearbook} (CQSY), published annually by the Chongqing Municipal Bureau of Statistics, which reports county-level per capita disposable income for urban and rural residents, GDP per capita, fiscal revenue, population, and urbanization rates.
+
+Land coupon transaction data are drawn from official transaction result announcements (``jiaoyi jieguo gongshi'') published on the website of the CCLE.\footnote{CCLE transaction announcements are available at \url{https://www.ccle.cn/info.html\#/infoList?id=32}.} We hand-collected all publicly available announcements from the program's inception in December 2008 through December 2020. Each announcement contains a source-project table listing every rural construction-land reclamation project whose land coupons were transacted in that batch. For each project, the table records the project name---which identifies the county-level unit and township where the land was reclaimed---a reclamation qualification certificate number, and the reclaimed area in square meters. The transaction price per square meter is set uniformly at the batch level by the exchange.\footnote{The CCLE also publishes payment disbursement announcements (``jiakuan zhibo gongshi'') that record the breakdown of transaction proceeds allocated to farmers, rural collectives, and reclamation costs for each project.} From these project-level records, we constructed two county-year variables: the annual area of land coupons transacted by each county and the cumulative area transacted through each year. We matched each project to the 37 counties in our panel using the county or district name listed in the project title. In total, the hand-collected dataset comprises over 1,500 individual reclamation-project records spanning 31 counties and 13 calendar years.\footnote{The raw transaction announcements and the aggregated county-year dataset are available as part of the replication materials.}
+
+The primary analysis panel spans 2009--2020 and covers 37 of Chongqing's 38 county-level administrative units. We exclude Yuzhong District, which is entirely urban and lacks rural population or income data, and drop Wansheng District due to missing observations following its 2011 administrative merger with Qijiang County. The resulting panel contains 444 observations (37 counties $\times$ 12 years) and is perfectly balanced.
+
+For robustness, we construct an extended panel reaching back to 2005 using historical CQSY editions. Pre-2009 income-ratio data are available for 16 of the 37 counties (12 counties from 2005; the remainder from 2006--2008), yielding an unbalanced panel of 504 county-year observations. This extension provides pre-treatment observations for the 2009 adoption cohort, which is already treated in the first year of the balanced panel. For the rural income analysis (Appendix~\ref{sec:rural_income}), pre-2009 rural income data are available for all 37 counties, yielding a larger extended panel of 592 observations.
+
+\subsection{Outcome and Treatment Variables}
+\noindent
+The primary outcome variable is the county-level urban--rural income ratio:
+\begin{equation}
+g_{it} \;=\; \frac{\text{Urban per capita disposable income}_{it}}{\text{Rural per capita disposable income}_{it}}.
+\label{eq:income_ratio}
+\end{equation}
+A declining $g_{it}$ indicates convergence between urban and rural incomes. In Appendix~\ref{sec:rural_income}, we also examine log rural disposable income directly to confirm that convergence is driven by rising rural incomes rather than falling urban incomes.
+
+Treatment is defined by the timing of first land coupon transaction. Let $E_i$ denote the first calendar year in which county $i$ records a positive land coupon trade through the CCLE. We construct three treatment variables:
+\begin{itemize}
+\item \textbf{Binary treatment:} $D_{it} = \mathbbm{1}[t \geq E_i]$, equal to one from the year of first adoption onward.
+\item \textbf{Annual transaction intensity:} $\ln(\text{area}_{it} + 1)$, the log of land coupon area transacted in county $i$ in year $t$.
+\item \textbf{Cumulative transaction intensity:} $\ln\!\left(\sum_{s \leq t} \text{area}_{is} + 1\right)$, the log of total area transacted through year $t$.
+\end{itemize}
+For never-treated counties ($E_i = \infty$), all three variables are zero throughout.
+
+\subsection{Treatment Cohorts and Sample Composition}
+\noindent
+We classify counties into treatment cohorts based on $E_i$ (Table~\ref{tab:cohorts}).
+
+\begin{table}[ht!]
+\centering
+\caption{Staggered Adoption: Treatment Cohort Distribution}
+\label{tab:cohorts}
+\begin{tabular}{lcc}
+\toprule
+Cohort & Counties & Share of Total \\
+\midrule
+First treated 2009 & 14 & 37.8\% \\
+First treated 2010 & 6 & 16.2\% \\
+First treated 2011 & 8 & 21.6\% \\
+First treated 2012 & 1 & 2.7\% \\
+First treated 2014 & 1 & 2.7\% \\
+First treated 2017 & 1 & 2.7\% \\
+Never treated & 6 & 16.2\% \\
+\midrule
+Total & 37 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{Tab: County-level Summary Statistics} presents summary statistics. The mean urban--rural income ratio is 2.46, with sufficient within-county variation ($\sigma_{\text{within}} = 0.21$) to support a fixed-effects strategy. Cumulative land coupon area averages 2.94 km$^2$ per county, with substantial variation both across counties ($\sigma = 2.80$) and within counties over time ($\sigma = 2.23$).
+
+\begin{table}[ht!]
+\centering
+\caption{Panel Summary Statistics of Chongqing Counties, 2009--2020}
+  \label{Tab: County-level Summary Statistics}
+\begin{tabularx}{\textwidth}{l *{4}{c}}
+\toprule
+Variable & Mean & SD overall & SD across & SD within \\
+\midrule
+Urban--rural income ratio              & 2.46     & 0.39     & 0.33     & 0.21 \\
+Urban disposable income (RMB)          & 26,171.30& 8,564.08 & 3,324.43 & 7,909.87 \\
+Rural disposable income (RMB)          & 11,227.54& 4,852.44 & 2,613.87 & 4,108.95 \\
+LC transacted (km$^2$)        & 0.44     & 0.82     & 0.39     & 0.72 \\
+Cumulative LC transacted (km$^2$) & 2.94 & 3.56     & 2.80     & 2.23 \\
+Population (thousand)                  & 899.48   & 358.90   & 348.36   & 102.31 \\
+GDP per capita (RMB)                   & 44,095.94& 24,079.32& 17,893.04& 16,358.57 \\
+Fiscal revenue (10k RMB)               & 267,903.80& 216,604.40& 183,239.50& 119,056.70 \\
+Urbanization rate (\%)                 & 55.44    & 20.44    & 19.84    & 5.83 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\input{table_balance}
+
+\subsection{Baseline Balance and Selection into Treatment}
+\noindent
+Table~\ref{tab:balance} compares baseline (2009) characteristics between treated and never-treated counties. Treated counties had significantly higher urban--rural income ratios (3.03 vs.\ 2.41, $p = 0.001$), lower GDP per capita (18,402 vs.\ 36,761 RMB, $p = 0.001$), and lower urbanization rates (40.5\% vs.\ 74.2\%, $p < 0.001$). These differences confirm that adoption was tilted toward more rural and disadvantaged areas, consistent with Section~3.1, and underscore the importance of county fixed effects.
+
+These imbalances also bear on the parallel-trends assumption. Three pieces of evidence mitigate the concern that treated counties were on structurally different trajectories. First, event-study pre-treatment coefficients are uniformly small and insignificant under both the CS and Sun--Abraham estimators (Section~\ref{sec:cs}). Second, the doubly robust CS estimator explicitly re-weights on pre-treatment covariates, providing additional protection against selection.
+
+Third, the six never-treated counties are structurally more urban: four are core urban districts (Dadukou, Jiangbei, Shapingba, Nan'an) with scarce rural land, and two are suburban districts (Dazu, Changshou). To avoid relying on these as the counterfactual, our preferred CS specification uses \emph{not-yet-treated} counties as the comparison group. In Section~\ref{sec:robustness_control}, we show that using never-treated counties instead produces slightly \emph{larger} effects, making our preferred specification the more conservative of the two, and that excluding the never-treated group from the TWFE event study leaves the results intact.
+
+
+
+\section{Empirical Strategy and Results}\label{sec:results}
+\noindent
+Our identification exploits staggered adoption of land coupon trading across Chongqing's counties. Although the LCP was authorized in 2008, counties entered the market at different times depending on the availability of eligible rural land, administrative readiness, household willingness, and urban development demand. This variation generates a natural experiment within a single province where all counties share the same macroeconomic environment and institutional framework. Our preferred estimator is the heterogeneity-robust doubly robust estimator of \citet{callaway2021difference}, which addresses biases of two-way fixed effects (TWFE) under treatment-effect heterogeneity \citep{goodman2021difference, sun2021estimating, de2020two}. We supplement this with the interaction-weighted (IW) estimator of \citet{sun2021estimating} and report conventional TWFE results in Appendix~\ref{sec:twfe_appendix}. A scope limitation of the county-level reduced-form design is that it identifies the aggregate LCP effect and can distinguish rural versus urban income channels, but cannot decompose rural income gains into property income, wage spillovers, or public goods effects, because the Chongqing Survey Yearbook reports only aggregate per capita figures. Disentangling these sub-channels requires household-level data, a task we leave to future work.
+
+\subsection{Identification Strategy}
+\noindent
+We estimate dynamic treatment effects via the event-study specification:
+\begin{equation}
+g_{it} = \sum_{e \neq -1} \beta_e \cdot \mathbbm{1}[t - E_i = e] + \alpha_i + \lambda_t + \varepsilon_{it},
+\label{eq:event_study}
+\end{equation}
+where $g_{it}$ is the urban--rural income ratio, $E_i$ is county $i$'s first treatment year, $\alpha_i$ and $\lambda_t$ are county and year fixed effects, and $e = -1$ is the reference period. Pre-treatment coefficients ($e < 0$) test the parallel-trends assumption; post-treatment coefficients ($e \geq 0$) estimate the causal effect at each horizon. For never-treated counties ($E_i = \infty$), $e = -1$ in all periods.\footnote{Because the six never-treated counties are structurally more urban, we verify in Section~\ref{sec:robustness_control} that excluding them does not change the estimates.} Standard errors are clustered at the county level.
+
+The identifying assumption is that, conditional on fixed effects, the timing of first land coupon transaction is as good as random with respect to the evolution of the income ratio. County and year fixed effects jointly absorb all time-invariant county characteristics and province-wide temporal shocks---the global financial crisis and China's 4-trillion-yuan fiscal stimulus \citep{ouyang2015fiscal}, the Wenchuan earthquake and reconstruction spending, labor market shifts associated with the Lewis turning point \citep{cai2010demographic}, and national urban--rural equalization policies---so identification relies solely on within-county variation in adoption timing.
+
+A limitation of this design is that 14 of the 31 treated counties (the 2009 cohort) are already treated in the first year of data, providing no pre-treatment observations. The CS estimator automatically drops this cohort, while the TWFE includes it with implicit negative weights that attenuate the estimate. The remaining 17 treated counties (2010--2017 cohorts) have pre-treatment periods ranging from one to eight years. Reassuringly, the event-study pre-treatment coefficients show no evidence of differential trends, and restricting the sample to the 2011+ cohorts yields a larger and more significant TWFE estimate ($-0.129$, $p = 0.008$; Appendix Table~\ref{tab:robustness}), suggesting that the pooled TWFE estimate is if anything attenuated by including the 2009 cohort.
+
+
+\subsection{Main Results}\label{sec:cs}
+\noindent
+We present the doubly robust estimator of \citet{callaway2021difference} as our primary specification. The CS estimator constructs group-time average treatment effects $ATT(g,t)$ for each cohort $g$ at each calendar time $t$, using \emph{not-yet-treated} counties as the comparison group, and aggregates them into summary parameters. We prefer not-yet-treated counties because the six never-treated units are structurally more urban (Table~\ref{tab:balance}); the results are robust to either comparison-group definition (Section~\ref{sec:robustness_control}). The doubly robust approach combines outcome regression with inverse probability weighting, ensuring consistency if either model is correctly specified.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{cs_event_study.png}
+\caption{Callaway and Sant'Anna (2021) Event-Study Estimates. Doubly robust ATT estimates aggregated by event time $e$, trimmed to $e \in [-4, +9]$. Not-yet-treated counties serve as the comparison group. Shaded band shows 95\% simultaneous confidence intervals based on the multiplier bootstrap. The 2009 cohort is automatically excluded because it lacks pre-treatment observations.}
+\label{fig:cs_event_study}
+\end{figure}
+
+Figure~\ref{fig:cs_event_study} presents the CS event-study estimates. Pre-treatment coefficients at $e = -4$ through $e = -2$ are small and statistically insignificant, supporting the parallel-trends assumption. Post-treatment, the coefficients are negative, significant, and monotonically growing: $-0.053$ at adoption, $-0.211$ after five years, and $-0.289$ after nine years (overall dynamic ATT $= -0.209$, SE $= 0.011$). All five cohort-specific ATTs are negative and significant.\footnote{The CS estimator drops the 2009 cohort (14 counties) because these units lack pre-treatment observations. The estimation sample comprises 23 counties over 12 years (276 observations). Replacing the not-yet-treated comparison group with never-treated counties produces slightly larger point estimates (Section~\ref{sec:robustness_control}).}
+
+Conditioning on time-varying controls (log GDP per capita, log fiscal revenue, log urbanization rate) via the outcome regression estimator yields a dynamic ATT of $-0.208$ (SE $= 0.043$), virtually identical to the baseline.\footnote{The propensity score model exhibits perfect separation for several group-time cells because some cohorts contain very few counties. We therefore use the outcome regression estimator for the controlled specification.} This near-invariance indicates that selection into treatment timing is not meaningfully correlated with evolving economic conditions.
+
+The monotonically growing treatment profile is consistent with a stock mechanism: as counties accumulate transactions, the transferred income compounds over time. Section~\ref{sec:stock} confirms this directly. The CS estimate at $e = -1$ is $-0.048$ and marginally significant, likely reflecting anticipation rather than a violation of parallel trends: because the treatment date records the first CCLE auction, land reclamation, certification, and household compensation may have begun in the preceding year, so that some income effects precede the recorded transaction.
+
+As an independent check, we also implement the interaction-weighted (IW) estimator of \citet{sun2021estimating}, which estimates separate event-study regressions for each treatment cohort and aggregates them using cohort-size weights, eliminating the contamination bias present in conventional TWFE \citep{sun2021estimating}. The SA dynamic ATT is $-0.222$ (SE $= 0.009$) without controls and $-0.193$ (SE $= 0.010$) with time-varying controls, close to the CS estimate of $-0.209$. Both estimators show insignificant pre-treatment coefficients and a monotonically growing negative post-treatment trajectory (Figure~\ref{fig:cs_sa_comparison}).
+
+\input{table_cs_sa_summary}
+
+Table~\ref{tab:cs_sa_summary} summarizes the results across both heterogeneity-robust estimators. The CS dynamic ATT is $-0.209$ without controls and $-0.208$ with controls; the SA estimator yields $-0.222$ and $-0.193$, respectively (all $p < 0.01$). All four specifications agree on the central finding: a large, statistically significant, and monotonically growing treatment effect that is robust to the inclusion of covariates. The near-invariance of the CS point estimate to controls, combined with the modest attenuation of the SA estimate, indicates that selection into treatment timing is at most weakly correlated with evolving economic conditions. A conventional TWFE event study is reported in Appendix~\ref{sec:twfe_appendix} as a benchmark; its pooled ATT ($-0.062$) is attenuated because the TWFE includes the 2009 cohort with implicit negative weights and averages uniformly over the full post-treatment trajectory.
+
+\subsection{Robustness and Sensitivity}
+
+\subsubsection{Alternative Estimators and Cohort Heterogeneity}\label{sec:sunab}
+\noindent
+Figure~\ref{fig:cs_sa_comparison} compares the CS and SA event-study profiles in detail. The SA estimator excludes the 2009 cohort (no pre-treatment observations), so its sample comprises 17 treated counties across five cohorts plus the six never-treated counties. Panel~(b) shows that the SA estimates are robust to conditioning on time-varying controls. Remaining differences between the two estimators reflect distinct comparison groups (never-treated for SA vs.\ not-yet-treated for CS) and weighting schemes.\footnote{We trim profiles to $e \in [-4, 9]$. At $e = 10$, only one cohort contributes to the SA estimate. Full results are in the replication materials.}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{cs_sa_comparison.png}
+\caption{Comparison of Heterogeneity-Robust Event-Study Estimators. Panel~(a): Callaway--Sant'Anna doubly robust estimates (not-yet-treated comparison group). Panel~(b): Sun--Abraham interaction-weighted estimates with and without time-varying controls (cohort-size-weighted aggregation; 2009 cohort excluded; never-treated comparison group). Both panels share the same vertical axis and are trimmed to $e \in [-4, 9]$. Shaded bands show 95\% confidence intervals.}
+\label{fig:cs_sa_comparison}
+\end{figure}
+
+To verify that no single cohort drives the effect, we estimate separate two-group DiD models for each treatment cohort against the never-treated counties.\footnote{Section~\ref{sec:robustness_control} shows that the choice of comparison group does not affect the qualitative conclusions.}
+
+\input{table_cohort_att}
+
+Table~\ref{tab:cohort_att} shows that all cohort-specific ATTs are negative and statistically significant at the 1\% level, ranging from $-0.093$ (Cohort 2014) to $-0.321$ (Cohort 2012). The effect is not driven by any particular group of counties.
+
+\subsubsection{Sensitivity to Comparison Group, Controls, and Sample}\label{sec:robustness_control}
+\noindent
+We address the concern that the six never-treated counties may follow different trajectories through three exercises. First, our preferred CS specification uses \emph{not-yet-treated} counties (dynamic ATT $= -0.209$, SE $= 0.028$); replacing them with never-treated counties yields $-0.222$ (SE $= 0.031$). Both specifications show insignificant pre-treatment coefficients and monotonically growing post-treatment effects. Quantitatively, the never-treated specification produces \emph{larger} effects at early event times ($-0.081$ vs.\ $-0.053$ at $e = 0$; $-0.232$ vs.\ $-0.211$ at $e = 5$), while the two converge at longer horizons. Using not-yet-treated counties---our preferred specification---yields the more conservative estimates.
+
+Second, dropping all six never-treated counties and relying exclusively on timing variation among the 31 treated counties produces a post-treatment trajectory that closely tracks the full-sample estimates (Appendix Table~\ref{tab:robustness}), and the pre-treatment coefficients remain insignificant. Third, the Goodman-Bacon decomposition (Appendix Figure~\ref{fig:bacon}) confirms that the sign and magnitude of the treatment effect are not driven by any particular comparison type.
+
+Appendix Table~\ref{tab:robustness} reports additional TWFE robustness checks: excluding the 2009 cohort ($-0.094$, $p = 0.031$), restricting to 2011+ cohorts ($-0.129$, $p = 0.008$), dropping the largest cohort ($-0.090$, $p = 0.037$), augmenting controls ($-0.066$, $p = 0.033$), and a log specification with the natural log of the income ratio as the dependent variable ($-0.016$, $p = 0.089$), which is directionally consistent but less precisely estimated because the log transformation compresses variation in the ratio. To assess the sensitivity of inference to the small number of clusters (37), we report wild cluster bootstrap $p$-values \citep{cameron2008bootstrap}: $p = 0.047$ for the baseline, $p = 0.024$ with controls, and $p = 0.003$ for the cumulative intensity specification, confirming that the standard clustered standard errors, if anything, slightly overstate uncertainty. Appendix Table~\ref{tab:loo} reports a leave-one-out analysis; point estimates range from $-0.055$ to $-0.060$, confirming that no single county drives the result.
+
+\subsubsection{Extended Panel with Pre-2009 Data}\label{sec:extended}
+\noindent
+A limitation of the balanced 2009--2020 panel is that the 2009 cohort (14 counties) is already treated in the first year of data, providing no pre-treatment observations. To address this, we extend the panel back to 2005 using county-level income data from the Chongqing Survey Yearbook. The extended panel is unbalanced: 16 of 37 counties have income-ratio data for 2006--2008 (12 counties from 2005), yielding 504 observations. Among the 2009 cohort, four counties now contribute up to three pre-treatment years.
+
+Figure~\ref{fig:event_study_ext} compares the balanced and extended panels. Post-treatment trajectories are virtually identical, confirming that the treatment effects are robust to sample extension. The extended-panel pooled TWFE estimate is $-0.118$ ($p = 0.004$), nearly twice the balanced-panel estimate of $-0.062$, reflecting the additional pre-treatment variation that sharpens identification. Pre-treatment coefficients at $e = -2$ and $e = -3$ remain small and insignificant ($+0.014$ and $+0.049$), consistent with parallel trends. The binned coefficient at $e \leq -4$ is marginally significant ($+0.114$, $p = 0.068$), but this bin aggregates distant event times identified from only 9 counties. The CS estimator applied to the extended panel yields a dynamic ATT of $-0.140$ (SE $= 0.102$), directionally consistent with the balanced-panel ATT of $-0.209$ but imprecise due to the unbalanced structure and missing group-time cells in small cohorts. The balanced 2009--2020 panel remains our primary specification.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{event_study_extended.png}
+\caption{Event Study: Balanced vs.\ Extended Panel. Panel (a) replicates the main event study on the balanced 2009--2020 panel ($N = 444$). Panel (b) extends the panel to 2005--2020 ($N = 504$, unbalanced), adding pre-treatment data for 16 counties including four from the 2009 cohort. Shaded areas are 95\% confidence intervals. The reference period is $e = -1$.}
+\label{fig:event_study_ext}
+\end{figure}
+
+
+\section{Mechanisms}
+\noindent
+Having established a robust causal effect, we now investigate the channels through which the LCP reduced within-county inequality. We proceed in four steps. First, a Theil decomposition establishes that the convergence operates predominantly \emph{within} counties rather than across them, confirming that the relevant mechanisms are local. Second, we exploit the granular transaction records---a distinctive feature of our data---to show that the convergence is driven by the \emph{accumulated stock} of land coupon trades rather than by contemporaneous annual flows, consistent with the lumpy, one-time nature of the income transfers generated by each transaction. Third, we decompose the income-ratio effect into its rural and urban components, finding that the convergence reflects rising rural incomes while urban incomes remain largely unaffected. Fourth, we document that participation was systematically correlated with baseline disadvantage: poorer and more unequal counties adopted earlier and traded more intensively, implying that the program's benefits were directed toward the areas where the gap was widest.
+
+\subsection{Within-County and Across-County Channels: Theil Decomposition}
+\noindent
+We decompose provincial inequality using the Theil index \citep{theil1967economics, shorrocks1980class,conceiccao2000young}, which can be additively separated into within-county and across-county components:
+\begin{equation}
+T_t \;=\; T_{t}^{\text{within}} \;+\; T_{t}^{\text{across}} .
+\end{equation}
+
+\begin{figure}[tph]
+     \centering
+         \centering
+         \includegraphics[width=0.80\textwidth]{theil_decomposition_over_years.png}
+        \caption{County-level Theil Index Decomposition over 2009--2020 in Chongqing}
+        \label{fig: theil}
+\end{figure}
+
+Figure~\ref{fig: theil} shows that the Theil index fell from 0.164 to 0.067 over 2009--2020, with within-county reductions accounting for roughly two-thirds of the decline ($-0.062$, or 64\%). This is consistent with the channels described in Section~3.1: asset monetization, capital reallocation, and collective revenues all operate within counties, transferring income from urban to rural residents. By contrast, across-county inequality declined only modestly. The dominance of the within-county component confirms that our county-level research design is well-targeted: because the LCP's effects operate primarily within counties, a within-county identification strategy is both natural and well-powered.
+
+
+\subsection{Stock Accumulation: Evidence from Transaction Records}\label{sec:stock}
+\noindent
+A distinctive feature of our setting is the availability of detailed transaction records for every land coupon trade: the county, date, area converted, and price. This granularity allows us to go beyond the binary treatment indicator used in standard staggered designs and test whether the convergence is driven by the \emph{accumulated stock} of transactions or by \emph{contemporaneous annual flows}---a distinction that most evaluations of land reforms cannot make.
+
+We replace the binary treatment indicator with two continuous intensity measures (Appendix Table~\ref{tab:main_did}). Log annual transaction area captures contemporaneous dose exposure and yields a small and statistically insignificant coefficient ($-0.008$, $p = 0.264$). Log cumulative transaction area captures the full trading history and yields a large, highly significant coefficient ($-0.083$, $p < 0.001$). The contrast is stark: doubling cumulative trading area reduces the income ratio by 0.083 points; doubling annual flows has no detectable effect.
+
+This stock pattern is consistent with the institutional design of the LCP. Land coupon revenues---whether received by individual households through demolition compensation or by village collectives through redistribution of proceeds---are lumpy, one-time transfers tied to the conversion of specific parcels. The resulting income injections do not recur annually but rather accumulate as households and collectives reinvest proceeds, relax liquidity constraints, and finance productive assets. The growing treatment profile in Section~\ref{sec:cs} (from $-0.053$ at adoption to $-0.289$ after nine years) is a direct manifestation of this stock mechanism: each additional year of program operation adds new transactions to the stock, generating fresh income injections that compound the cumulative effect.
+
+We acknowledge that cumulative area is mechanically correlated with time since adoption. However, three pieces of evidence favor the stock interpretation: the annual flow measure is insignificant, ruling out a contemporaneous dose-response channel; cohort-specific ATTs (Table~\ref{tab:cohort_att}) show that all cohorts produce significant negative effects despite widely varying treatment durations, and the 2012 cohort---which had relatively few treatment years but accumulated a large transaction volume---yields the largest ATT ($-0.321$); and the multiplier analysis in Section~\ref{sec:provincial} confirms consistency with a stock-based mechanism with a multiplier of approximately 2.0.
+
+
+\subsection{Income Channel: Rural versus Urban Income}
+\noindent
+We estimate event-study specifications with log rural and log urban disposable income as dependent variables to decompose the convergence into its income-side components.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{income_decomposition_event_study.png}
+\caption{Event Study: Income Channel Decomposition. Panel (a) shows the effect on log rural disposable income per capita. Panel (b) shows the effect on log urban disposable income per capita. Both panels share the same vertical axis to facilitate magnitude comparison.}
+\label{fig:income_channels}
+\end{figure}
+
+Figure~\ref{fig:income_channels} reveals that the convergence is driven predominantly by rising rural incomes. Panel (a) shows a monotonic increase in log rural income following adoption, reaching approximately $+0.147$ (a 15.8\% increase) after ten years. Panel (b) shows that urban incomes are essentially unaffected in the first several post-adoption years, with small positive effects emerging only after five years---likely reflecting general economic spillovers rather than the land coupon mechanism itself. The rural income effect is roughly twice the urban effect at every post-treatment horizon, consistent with the asset-monetization and multiplier channels described in Section~3.1. Pooled TWFE regressions confirm: the treatment effect on log rural income is $+0.018$, while the effect on log urban income is $+0.002$ (Appendix Table~\ref{tab:income_channel}).
+
+County-level data do not decompose income into wages, property income, and transfers, so we cannot distinguish direct compensation from multiplier-driven wage gains. Future work with household-level survey data could address this decomposition. A related limitation concerns labor migration: if the LCP induces rural residents to remain in (or return to) their home counties rather than migrating to urban areas, this could affect the composition of the rural population and thus measured rural incomes. However, the direction of this bias likely works against our findings: if lower-income individuals are retained in rural areas, this would depress measured rural per capita income and attenuate the estimated convergence effect. The fact that we still find significant convergence despite this potential attenuation strengthens the interpretation that the LCP generates real income gains for rural communities.
+
+An important caveat is that a narrowing of the measured income ratio is not synonymous with welfare improvement. Our outcome variable captures per capita disposable income as reported in administrative statistics, but the land reclamation process imposes costs on participating households that these statistics do not reflect. Households that demolish homestead plots bear demolition disutility and emotional costs of leaving established dwellings; they incur relocation expenses if they must secure alternative housing; they lose the informal insurance embodied in homesteads, which serve as a fallback asset in the absence of formal social safety nets; and they face transaction costs associated with navigating the reclamation certification and coupon issuance process. \citet{han2019transforming} document that some participating farmers reported delayed compensation payments and inadequate transitional social security, suggesting that the gap between measured income gains and realized welfare may be nontrivial. Our estimates therefore provide an upper bound on the welfare effects of the program.
+
+\subsection{Participation and Baseline Disadvantage}
+\noindent
+The balance table (Table~\ref{tab:balance}) established that treated counties were more disadvantaged at baseline. We extend this by showing that baseline inequality also predicted trading intensity: counties with higher initial income ratios accumulated larger transaction volumes. A two-part model confirms that a one-unit increase in the baseline ratio raised both the likelihood of annual participation ($p < 0.10$) and cumulative area transacted ($p < 0.05$). Among controls, fiscal revenues enter significantly for participation ($p < 0.01$), highlighting that stronger local fiscal capacity facilitated transactions, while more urbanized counties were significantly less likely to participate and transacted smaller cumulative areas, consistent with land coupon supply being concentrated in less urbanized, more rural counties.
+
+These patterns have two important implications. First, they suggest that the LCP functioned as a de facto targeted mechanism, directing resources and opportunities to the areas where the urban--rural divide was widest. Second, when combined with the within-county convergence results, the evidence points to a reinforcing mechanism: counties that began with the largest gaps were also those most engaged in land coupon trading, and it is precisely within these counties that the program produced measurable reductions in income disparities.
+
+
+\section{Supplementary Provincial-Level Evidence}\label{sec:provincial}
+\noindent
+We complement the county-level analysis with two macro-level exercises: a provincial synthetic control analysis and a multiplier simulation. These are not the basis of causal identification but offer corroborating evidence that the aggregate effect is consistent with the county-level findings.
+
+
+\subsection{Synthetic Control and MASC Results}
+\noindent
+We employ the Synthetic Control Method (SCM) and the Matching and Synthetic Control (MASC) estimator \citep{kellogg_mogstad_pouliot_torgovitsky_2020} to compare Chongqing's urban--rural income ratio with that of other provinces. The treatment unit is Chongqing, where the LCP was introduced in 2008. The donor pool consists of 29 remaining provinces (excluding Sichuan, where Chengdu also experimented with land market reforms). Provincial panel data are drawn from the China Statistical Yearbook (2000--2019; summary statistics in Table~\ref{Tab: Provincial-level Summary Statistics}); the pre-treatment period spans 2000--2007.
+
+MASC combines SCM and $k$-nearest-neighbor matching through model averaging:
+\begin{equation}
+    \hat{\mu}_{t}^{\text{masc}}(\phi, m) \equiv \phi \,\hat{\mu}_{t}^{ma}(m)+(1-\phi) \,\hat{\mu}_{t}^{sc},
+\end{equation}
+where $\phi \in[0,1]$ is a cross-validated tuning parameter, $m$ is the number of nearest neighbors, and $\hat{\mu}_{t}^{ma}$ and $\hat{\mu}_{t}^{sc}$ are the matching and SCM estimators respectively. The SCM limits extrapolation bias but may suffer from interpolation bias, while matching has the opposite profile. MASC resolves this trade-off through a rolling-origin cross-validation procedure that minimizes one-step-ahead forecast error over folds of the pre-treatment sample \citep{kellogg_mogstad_pouliot_torgovitsky_2020}. A key advantage of MASC is that, by data-driven selection of $\phi$, it is guaranteed to achieve weakly lower out-of-sample prediction error than either the SCM or matching estimator alone, guarding against misspecification of either component. We report results under two predictor specifications: auxiliary covariates (income levels, sectoral composition, GDP per capita) and lagged outcomes only.
+
+Figure~\ref{fig:first_case_MASC} presents the auxiliary-covariate results. The SCM tracks Chongqing's pre-treatment trajectory closely; post-2008, the actual ratio falls consistently below the synthetic estimate. The SCM estimates an average treatment effect of $-0.32$ over the post-treatment period, with the cumulative gap reaching $-0.37$ by 2019. The MASC is dominated by the SCM component ($\phi = 0.051$), with an average treatment effect of $-0.299$. Applying a common robustness filter---excluding units with pre-treatment mean square prediction errors (MSPE) more than 20 times that of Chongqing---yields 26 valid comparisons; Chongqing ranks 2nd, corresponding to a placebo $p$-value of 0.077.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{first-case-MASC.png}
+\caption{SCM and MASC Estimates of the LCP Effect on Chongqing's Urban--Rural Income Ratio (Controls Based on Auxiliary Covariates). The black line is Chongqing's actual trajectory; the blue line is the synthetic control; the green line is the matching estimator; the red line is the MASC estimator. The dashed vertical line marks 2008.}
+\label{fig:first_case_MASC}
+\end{figure}
+
+The lagged-outcomes specification yields SCM and MASC estimates of $-0.30$ to $-0.40$ (Appendix~\ref{sec:lagged_outcomes_scm}), broadly consistent with the auxiliary-covariate specification and the county-level CS estimate of $-0.29$ at nine years. The two cases thus bracket a plausible range for the aggregate provincial effect.
+
+We acknowledge important limitations of this provincial-level analysis. Multiple macro shocks coincided with the LCP's launch in 2008: the global financial crisis and China's fiscal stimulus, the Wenchuan earthquake and associated reconstruction, and structural shifts in labor markets. While the synthetic control approach attempts to control for these through pre-treatment matching, no single counterfactual can fully separate the LCP from these concurrent forces. Moreover, several provinces in the donor pool (Anhui, Jiangsu, Zhejiang, Guangdong) were experimenting with similar quota-transfer schemes during this period, potentially contaminating the control group. These concerns reinforce our emphasis on the county-level design as the primary identification strategy.
+
+
+\subsection{Multiplier Analysis}
+\noindent
+The direct income transfers generated by the LCP are large in absolute terms. Between 2008 and 2019, more than 185 million m$^2$ of rural construction land was converted and transacted, transferring over 54 billion RMB to rural households and collectives---approximately 5,402 RMB per rural resident, equivalent to nearly one-third of 2019 rural per capita disposable income.
+
+The significance of these transfers lies not only in their scale but also in their potential to generate multiplier effects within local economies. Because rural households in Chongqing are relatively poor, they are unlikely to save much of the additional income, and their limited mobility implies that most expenditures occur locally \citep{hu2023motivations,liu2018impacts}. Collectives, which receive roughly 15\% of land coupon revenues, can also channel funds into public goods and infrastructure. Both channels suggest that income injections are likely to recirculate through rural economies with limited leakage, amplifying their initial impact.
+
+\begin{figure}[th!]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{multiplier_urban_rural_ratio.png}
+        \caption{Urban--Rural Income Ratio}
+        \label{fig:multiplier_ratio}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{multiplier_rural_disposable_income.png}
+        \caption{Rural Disposable Income per Capita}
+        \label{fig:multiplier_income}
+    \end{subfigure}
+    \caption{Multiplier Effects of Land Coupon program: Actual versus Counterfactual Estimates. Simulated trajectories augment 2008 baseline rural incomes with cumulative land coupon revenues multiplied by alternative multipliers (1.2, 1.5, 1.8, 2.0).}
+    \label{fig:multiplier_figures}
+\end{figure}
+
+To provide a rough quantitative benchmark, we conduct back-of-the-envelope simulations under three assumptions: (i) land coupon transfers do not impact urban disposable incomes, as developers finance purchases through land development profits rather than household transfers; (ii) land coupon revenues have persistent effects on rural earnings by relaxing liquidity constraints and enabling investments in productive assets and human capital---consistent with our finding that cumulative rather than annual transactions drive convergence; and (iii) multiplier effects operate primarily within rural areas, since rural households spend most of the additional income locally and collectives provide place-based public goods. Under these assumptions, we estimate rural disposable incomes by augmenting the 2008 baseline with cumulative land coupon revenues multiplied by alternative multipliers (1.2, 1.5, 1.8, 2.0).
+
+Figure~\ref{fig:multiplier_figures} shows that a multiplier of approximately 2.0 generates a simulated income-ratio trajectory that closely overlaps the actual path. Such a multiplier is reasonable for the setting: \cite{hughes2003policy} suggest multipliers of 1.7--2.2 for small-to-medium communities, \cite{fuad2011national} report multipliers of 1.86--3.11 for various sectors in Malaysia, and \cite{gordon1978income} caution that reported multipliers in excess of 2.5 ``should be critically evaluated.''
+
+The broad consistency across the county-level event study, provincial SCM/MASC, and multiplier analysis is reassuring, though each exercise carries its own limitations. Taken together, the evidence is consistent with the interpretation that land coupon revenues not only transferred income to rural areas but also generated local multiplier effects that amplified the initial transfers, contributing to the substantial narrowing of Chongqing's income gap over the decade.
+
+
+
+
+\section{Conclusion}
+\noindent
+This paper finds that Chongqing's Land Coupon program durably reduced urban--rural income inequality, over and above the secular convergence observed nationally. The treatment effect grows monotonically, reaching $-0.29$ on the income ratio after nine years under the preferred Callaway--Sant'Anna estimator, confirmed by the Sun--Abraham interaction-weighted estimator. Convergence is driven by rising rural incomes, operates through cumulative rather than annual transactions, and is concentrated in counties with wider baseline disparities that adopted earlier and traded more intensively. These findings map directly onto the three empirical predictions of Section~3.1: the income ratio declines within participating counties and the effect grows with cumulative transactions (prediction~i); the convergence is driven by rising rural incomes rather than falling urban incomes (prediction~ii); and participation is correlated with baseline disadvantage (prediction~iii).
+
+Three design features carry implications for land-use governance beyond Chongqing. First, the centralized market infrastructure of the CCLE---with transparent auctions, standardized instruments, and publicly posted prices---enabled efficient price discovery and reduced information asymmetries between rural sellers and urban buyers. Whether bilateral, administratively managed transfer systems produce comparable pro-rural effects remains an open question. Second, our finding that cumulative transactions drive convergence implies that TDR programs require sustained institutional commitment. Programs interrupted before the accumulated stock reaches a critical mass risk forfeiting long-run gains, underscoring the need for safeguards---dedicated funding, legislative mandates, independent exchange governance---that insulate programs from short-term political cycles. Third, the correlation between participation and baseline disadvantage depends on voluntary participation; our findings do not extend to settings where land reclamation is coerced. Moreover, as discussed in Section~6, aggregate income convergence is not synonymous with welfare improvement: participating households bear costs---demolition disutility, relocation expenses, loss of informal insurance---that disposable income statistics do not capture \citep{han2019transforming}. Future program design should pair market-based trading with minimum compensation floors, relocation assistance, and accessible grievance mechanisms.
+
+These lessons must be read against our setting's scope conditions. Chongqing combines strong state capacity, a single centralized exchange, and a decade of uninterrupted policy stability---conditions not universally available. The local multiplier effects we document depend on recirculation of revenues within rural economies; inter-provincial quota transfers, now under consideration in China \citep{xie2025establishment, StateCouncil2018}, might dilute these benefits if revenues flow to distant jurisdictions. TDR expansion in India and other developing countries faces additional constraints---incomplete land titling, fragmented registries, and weak enforcement---that Chongqing's comprehensive land administration framework does not address.
+
+Important data limitations remain. County-level income data do not decompose into property income, wages, and transfers, precluding direct tests of the asset-monetization channel. Disentangling these sub-channels and identifying which households capture disproportionate gains or bear disproportionate costs requires household-level survey data linked to transaction records, a task we leave to future work.
+
+
+\newpage
+\singlespacing
+\bibliographystyle{apalike}
+\bibliography{reference}
+
+\newpage
+\doublespacing
+\appendix
+\renewcommand{\thefigure}{A.\arabic{figure}}
+\renewcommand{\thetable}{A.\arabic{table}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+\section{TWFE Benchmark Results}\label{sec:twfe_appendix}
+\noindent
+As a benchmark, we report pooled staggered difference-in-differences estimates via two-way fixed effects:
+\begin{equation}
+g_{it} = \beta \cdot D_{it} + \gamma' X_{it} + \alpha_i + \lambda_t + \varepsilon_{it},
+\label{eq:twfe}
+\end{equation}
+where $D_{it} = \mathbbm{1}[t \geq E_i]$ is a binary treatment indicator and $X_{it}$ is an optional vector of time-varying controls including log GDP per capita, log fiscal revenue, and log urbanization rate. Because the pooled TWFE estimand can be biased under heterogeneous treatment effects in staggered settings \citep{goodman2021difference}, we rely on the CS estimator (Section~\ref{sec:cs}) for our preferred causal estimates and present the TWFE results here for transparency.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{event_study_main.png}
+\caption{TWFE Event Study: Effect of Land Coupon program Adoption on Urban--Rural Income Ratio. Coefficients from Equation~\eqref{eq:event_study} with 95\% confidence intervals. The reference period is $e = -1$. Circles show estimates without controls; diamonds show estimates with time-varying controls.}
+\label{fig:event_study}
+\end{figure}
+
+Figure~\ref{fig:event_study} presents the conventional TWFE event-study estimates. The pre-treatment coefficients for $e = -4$ through $e = -2$ are small in magnitude (ranging from $+0.004$ to $+0.030$) and statistically insignificant. Post-treatment, the coefficients are negative, statistically significant, and monotonically increasing in absolute value: $\hat{\beta}_0 = -0.047$ ($p = 0.014$) at adoption, $\hat{\beta}_5 = -0.197$ ($p < 0.001$) after five years, and $\hat{\beta}_{10} = -0.284$ ($p < 0.001$) after ten years. Estimates with time-varying controls closely track the baseline specification.
+
+\input{table_main_did}
+
+Table~\ref{tab:main_did} reports the pooled TWFE estimates from Equation~\eqref{eq:twfe} under three treatment measures. The binary treatment ATT is $-0.062$ ($p = 0.050$); log annual transaction area is insignificant ($-0.008$, $p = 0.264$); and log cumulative transaction area yields $-0.083$ ($p < 0.001$), confirming the stock mechanism. These estimates are smaller in magnitude than the CS estimates (Section~\ref{sec:cs}) because the TWFE averages uniformly over the full post-treatment trajectory and includes the 2009 cohort, which receives implicit negative weights under treatment-effect heterogeneity.
+
+\input{table_robustness}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.75\textwidth]{bacon_decomposition.png}
+\caption{Goodman-Bacon Decomposition of the TWFE Estimate. Each point represents a 2$\times$2 DiD comparison. Blue circles: treated vs.\ never-treated comparisons. Orange squares: earlier vs.\ later treated comparisons. The majority of TWFE weight comes from clean comparisons against never-treated units.}
+\label{fig:bacon}
+\end{figure}
+
+
+\section{Land Coupon Mechanism: Workflow Diagram}\label{sec:lcp_workflow}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{lcp_workflow.png}
+\caption{Land Coupon program: Mechanism from Land Reclamation to Income Convergence. The top row traces the land supply chain from rural homestead to coupon issuance and centralized auction on the Chongqing Country Land Exchange (CCLE). Auction revenue is distributed 85\% to rural households and 15\% to village collectives \citep{ChongqingLandCoupon2015}. Household revenue raises rural incomes directly, while collective revenue finances local public goods and infrastructure. Both channels contribute to a narrowing of the urban--rural income ratio.}
+\label{fig:lcp_workflow}
+\end{figure}
+
+
+\section{Effect on Rural Disposable Income}
+\label{sec:rural_income}
+
+The main analysis examines the urban--rural income \emph{ratio}, which captures convergence between urban and rural incomes.  A natural follow-up question is whether the Land Coupon program affects the \emph{level} of rural disposable income.  In this appendix we report event-study estimates using log rural disposable income ($\ln \mu_r$) as the dependent variable.
+
+\paragraph{Estimation strategy.}
+We estimate three complementary specifications.  First, we run a standard TWFE event study on the balanced 2009--2020 panel (444 observations, 37 counties), identical to the main specification but replacing the income ratio with log rural income.  Second, we estimate the Callaway and Sant'Anna (2021) doubly robust estimator, which aggregates group-time ATTs into an event-study path.  Because the 2009 adoption cohort (14 counties) lacks pre-treatment periods, the CS estimator effectively uses 23 counties (276 county-year observations) with never-treated units as the control group.  Third, we extend the panel to 2005--2020 using pre-2009 data for rural income, which is available for all 37 counties across all 16 years (592 observations), providing up to four additional pre-treatment periods for the 2009 cohort.
+
+\paragraph{Results.}
+Figure~\ref{fig:rural_income_es} displays the event-study coefficients.  All three panels reveal a monotonically increasing treatment effect on rural income following adoption.  In the TWFE specification (panel~a), the estimated effect grows from approximately 1.3\% at event time~0 to 14.7\% ($e^{0.137}-1$) by event time~+10.  The CS doubly robust estimates (panel~b) trace a remarkably similar trajectory, with the overall ATT of 0.085 (SE = 0.017, $p < 0.01$) indicating that the program raises rural disposable income by roughly 8.9\% on average across all post-treatment group-time cells.  Pre-treatment coefficients at $e = -2$ and $e = -4$ are close to zero and statistically insignificant in both the TWFE and CS specifications, supporting the parallel-trends assumption.  Some coefficients at longer pre-treatment leads ($e \leq -5$) are significant in the CS specification.  At these distant horizons, only the latest-adopting cohorts (2014 and 2017) contribute to the estimate, so the coefficients reflect the idiosyncratic trajectories of one or two counties rather than a systematic violation of parallel trends.
+
+The extended panel (panel~c) confirms these patterns with greater precision.  The binary TWFE estimate becomes significant (0.022, $p < 0.01$) because the extended pre-treatment window substantially improves identification of the 2009 cohort.
+
+Table~\ref{tab:rural_income} reports pooled TWFE and CS overall estimates.  While the binary treatment indicator is insignificant on the balanced panel (column~1, 0.018, $p = 0.19$)---reflecting the averaging of a growing trajectory---the cumulative intensity measure is highly significant (column~2, 0.046, $p < 0.001$), consistent with the cumulative intensity pattern observed for the income ratio.  The CS doubly robust overall ATT (column~4, 0.085, $p < 0.01$) is larger than the TWFE binary estimate because it weights later event times---where the effect is largest---proportionally to group sizes rather than applying the implicit TWFE weighting scheme.
+
+These results complement the main findings on the income ratio.  The reduction in the urban--rural income gap documented in the main text is driven in part by rising rural incomes, consistent with the theoretical mechanism whereby land coupon revenues finance rural infrastructure and public services that raise agricultural productivity and rural household welfare.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=\textwidth]{event_study_rural_income.pdf}
+    \caption{Event-study estimates: Effect of Land Coupon program on log rural disposable income.  Panel~(a) shows TWFE event-study coefficients on the balanced 2009--2020 panel.  Panel~(b) shows Callaway--Sant'Anna doubly robust event-study estimates (2009 cohort dropped due to lack of pre-treatment periods; $N_{\text{eff}} = 276$).  Panel~(c) shows TWFE on the extended 2005--2020 unbalanced panel.  Bars indicate 95\% confidence intervals.  All specifications normalize $e = -1$ to zero.}
+    \label{fig:rural_income_es}
+\end{figure}
+
+\input{table_rural_income}
+
+\section{Lagged-Outcomes Synthetic Control Specification}
+\label{sec:lagged_outcomes_scm}
+
+As a complement to the auxiliary-covariate specification reported in the main text (Section~\ref{sec:provincial}), we re-estimate the SCM and MASC using only lagged values of the urban--rural income ratio as predictors.
+
+Figure~\ref{fig:second_case_MASC} presents the results. The SCM estimates an average treatment effect of $-0.30$ over the post-treatment period, with the cumulative gap reaching $-0.40$ by 2019. The donor composition shifts markedly (Table~\ref{table:Province-components}): the largest weights go to Guizhou (0.575), Beijing (0.269), and Yunnan (0.062). In contrast to the auxiliary-covariate case, the matching component dominates the MASC ($\phi = 0.922$), and the MASC-estimated average treatment effect is $-0.397$, peaking at $-0.42$ in 2017.
+
+\begin{table}[ht!]
+\centering
+\caption{Estimated Chongqing Weights (Provincial Synthetic Control)}
+\small
+	\begin{tabular}{cc||cc}
+		\toprule
+		\multicolumn{2}{c||}{Synthetic Control} & \multicolumn{2}{c}{Optimal Matching} \\
+		\textbf{Province} & \textbf{Weight}  & \textbf{Province} & \textbf{Weight} \\
+		\midrule
+		\multicolumn{4}{c}{With auxiliary covariates} \\
+		\midrule
+        Shanghai & 0.043 & Anhui & 0.167\\
+        Hubei &  0.002 & Jiangxi &  0.167\\
+        Hunan & 0.343 & Hubei & 0.167\\
+        Guangdong &  0.084 & Hunan &  0.167\\
+        Guizhou & 0.527 & Sichuan & 0.167\\
+         & & Shaanxi & 0.167\\
+		\midrule
+		\multicolumn{4}{c}{Exclusively with lagged outcomes} \\
+		 \midrule
+		 Beijing & 0.269 & Shaanxi & 0.167\\
+        Heilongjiang & 0.052 & Guangxi & 0.167\\
+        Guizhou & 0.575 & Qinghai & 0.167\\
+        Yunnan & 0.062 & Ningxia & 0.167\\
+        Xinjiang & 0.042 & Gansu & 0.167\\
+         & & Xinjiang & 0.167\\
+		\bottomrule
+	\end{tabular}%
+	\label{table:Province-components}
+\end{table}%
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=\textwidth]{second-case-MASC.png}
+\caption{SCM and MASC Estimates of the LCP Effect on Chongqing's Urban--Rural Income Ratio (Controls Based Exclusively on Lagged Outcomes). The black line is Chongqing's actual trajectory; the blue line is the synthetic control; the green line is the matching estimator; the red line is the MASC estimator.}
+\label{fig:second_case_MASC}
+\end{figure}
+
+\section{Additional Tables and Figures}
+
+\begin{table}[ht!]
+\centering
+\caption{Panel Summary Statistics of Provinces in China, 2000--2019}
+\label{Tab: Provincial-level Summary Statistics}
+\begin{tabularx}{\textwidth}{l *{5}{c}}
+\toprule
+Variable & N & Mean & SD overall & SD across & SD within \\
+\midrule
+Population (10k)                & 600 & 4,155.98 & 2,669.61 & 2,701.99 & 240.10  \\
+Urban population (\%)           & 450 & 53.48    & 14.64    & 13.86    & 5.31    \\
+Urban disposable income (RMB)   & 600 & 19,824.38& 12,345.28& 5,175.28 & 11,245.98 \\
+Urban property income (RMB)     & 600 & 1,181.34 & 1,819.98 & 736.34   & 1,669.53 \\
+Rural disposable income (RMB)   & 600 & 7,511.36 & 5,560.15 & 2,851.90 & 4,799.99 \\
+Rural property income (RMB)     & 600 & 234.57   & 288.80   & 221.08   & 189.94   \\
+Urban--Rural income ratio       & 600 & 2.89     & 0.62     & 0.53     & 0.33     \\
+Rural living space area (m$^2$) & 390 & 29.92    & 10.42    & 9.85     & 3.82     \\
+Rural living space value (RMB)  & 390 & 377.02   & 355.47   & 252.06   & 254.53   \\
+Primary-sector GDP share (\%)   & 600 & 12.04    & 6.63     & 5.80     & 3.38     \\
+Secondary-sector GDP share (\%) & 600 & 45.11    & 8.55     & 6.97     & 5.11     \\
+Finance GDP share (\%)          & 540 & 4.82     & 2.95     & 2.43     & 1.72     \\
+GDP per capita (RMB)            & 600 & 34,617.94& 27,494.09& 17,051.30& 21,780.74 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[ht!]
+     \centering
+     \begin{subfigure}[a]{\textwidth}
+         \centering
+         \includegraphics[width=0.75\textwidth]{1placebo_test.png}
+         \caption{First Case}
+         \label{fig:Placebo 1}
+     \end{subfigure}
+
+     \begin{subfigure}[b]{\textwidth}
+         \centering
+         \includegraphics[width=0.75\textwidth]{2placebo_test.png}
+         \caption{Second Case}
+         \label{fig:Placebo 2}
+     \end{subfigure}
+        \caption{Placebo Test: Difference between observed units and synthetic controls for Chongqing and controls}
+        \label{fig:Placebo}
+\end{figure}
+
+\input{table_loo}
+
+\input{table_mechanism_income}
+
+\end{document}

@@ -1,0 +1,199 @@
+---
+title: "multiplier_effect"
+author: "Yao Ma"
+date: "2025-09-02"
+output: html_document
+---
+
+```{r rural disposable income comparison under different levels of multipliers}
+# ---- Setup ----
+suppressPackageStartupMessages({
+  library(readxl)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(scales)
+})
+
+# ---- Load data ----
+excel_path <- "rural_disposable_income.xlsx"
+raw_tbl <- readxl::read_excel(excel_path, sheet = 1, col_names = FALSE)
+print(head(raw_tbl))  # preview raw
+
+# ---- Clean headers and types ----
+headers <- as.character(unlist(raw_tbl[1, ]))
+df <- raw_tbl[-1, ]
+colnames(df) <- headers
+
+suppressWarnings({
+  df$Year <- as.integer(df$Year)
+  num_cols <- setdiff(names(df), "Year")
+  df[num_cols] <- lapply(df[num_cols], function(x) as.numeric(as.character(x)))
+})
+
+print(head(df))  # preview cleaned
+
+# ---- Reshape long for plotting ----
+long_df <- df %>%
+  pivot_longer(-Year, names_to = "Series", values_to = "Value")
+
+print(head(long_df))  # preview long
+
+# ---- Define series order and colors ----
+series_levels <- c(
+  "Actual Rural Disposable Income",
+  "Rural Disposable Income(1.2x Multiplier)",
+  "Rural Disposable Income(1.5x Multiplier)",
+  "Rural Disposable Income(1.8x Multiplier)",
+  "Rural Disposable Income(2.0x Multiplier)",
+  "Cumulative Revenue from LC per capita"
+)
+
+plot_df <- long_df %>%
+  mutate(Series = factor(Series, levels = series_levels))
+
+col_actual <- "#33a02c"                 # actual (blue)
+col_cf <- c("#d9d9d9", "#a6a6a6", "#737373", "#404040")   # counterfactuals: deeper gray for higher multipliers
+col_rev <- "darksalmon"                    # muted green for cumulative revenue per capita
+
+# ---- Plot (scientific style + boxed legend with 5 rows) ----
+p <- ggplot(plot_df, aes(x = Year, y = Value, color = Series)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 1.6) +
+  scale_color_manual(
+    values = c(
+      "Actual Rural Disposable Income" = col_actual,
+      "Rural Disposable Income(1.2x Multiplier)" = col_cf[1],
+      "Rural Disposable Income(1.5x Multiplier)" = col_cf[2],
+      "Rural Disposable Income(1.8x Multiplier)" = col_cf[3],
+      "Rural Disposable Income(2.0x Multiplier)" = col_cf[4],
+      "Cumulative Revenue from LC per capita" = col_rev
+    )
+  ) +
+  scale_x_continuous(breaks = seq(min(df$Year, na.rm = TRUE), max(df$Year, na.rm = TRUE), by = 2)) +
+  scale_y_continuous(labels = label_number(accuracy = 1)) +
+  labs(
+    title = "Rural Disposable Income per Capita in Chongqing", 
+    subtitle = "Actual vs. counterfactual under multiplier effects of the land coupon policy",
+    x = NULL,
+    y = "Income per Capita (RMB)"
+  ) +
+  theme_bw(base_size = 12) +
+  theme(
+    panel.grid.major = element_line(color = "gray90", linewidth = 0.3),
+    panel.grid.minor = element_blank(),
+    panel.border     = element_rect(color = "gray70", fill = NA, linewidth = 0.5),
+    plot.title       = element_text(face = "bold"),
+    plot.subtitle    = element_text(color = "gray40"),
+    axis.title.y     = element_text(margin = margin(r = 6)),
+    axis.text        = element_text(color = "gray20"),
+    legend.position  = c(0.02, 0.98),
+    legend.justification = c(0, 1),
+    legend.background   = element_rect(color = "gray70", fill = "white", linewidth = 0.4),
+    legend.key          = element_rect(fill = NA),
+    legend.text         = element_text(size = 9)
+  ) +
+  guides(color = guide_legend(title = NULL, nrow = 6, byrow = TRUE))
+
+print(p)  # render plot
+
+ggsave("multiplier_rural_disposable_income.png", p, width = 6.5, height = 6.5, dpi = 300)
+```
+
+
+```{r Urban-rural income ratio comparison under different levels of multipliers}
+suppressPackageStartupMessages({
+  library(readxl)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(scales)
+})
+
+# Load updated Excel (ensure the file is in your working directory)
+excel_path <- "urban_rural_income_ratio.xlsx"
+
+# Read as raw table (first row contains headers)
+raw_tbl <- readxl::read_excel(excel_path, sheet = 1, col_names = FALSE)
+
+# Set headers and clean types
+headers <- as.character(unlist(raw_tbl[1, ]))
+df <- raw_tbl[-1, ]
+df <- df[ , -ncol(df)]
+colnames(df) <- headers
+
+suppressWarnings({
+  df$Year <- as.integer(df$Year)
+  num_cols <- setdiff(names(df), "Year")
+  df[num_cols] <- lapply(df[num_cols], function(x) as.numeric(as.character(x)))
+})
+
+# Reshape to long format, preserving all series in order
+long_df <- df %>%
+  pivot_longer(-Year, names_to = "Series", values_to = "Ratio") %>%
+  mutate(
+    Series = factor(
+      Series,
+      levels = c(
+        "Actual",
+        "Estimated (1.2x Multiplier)",
+        "Estimated (1.5x Multiplier)",
+        "Estimated (1.8x Multiplier)",
+        "Estimated (2.0x Multiplier)"
+      )
+    )
+  )
+
+# Colors: deeper grayscale for higher multipliers; distinct colors for methods; strong blue for actual
+col_actual <- "#33a02c"
+col_cf <- c("#d9d9d9", "#a6a6a6", "#737373", "#404040")    # 1.2x light -> 2.0x dark
+
+color_map <- c(
+  "Actual" = col_actual,
+  "Estimated (1.2x Multiplier)" = col_cf[1],
+  "Estimated (1.5x Multiplier)" = col_cf[2],
+  "Estimated (1.8x Multiplier)" = col_cf[3],
+  "Estimated (2.0x Multiplier)" = col_cf[4]
+)
+
+# Plot (scientific style) with boxed legend lower-left in 4 rows
+p <- ggplot(long_df, aes(x = Year, y = Ratio, color = Series)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 1.6) +
+  scale_color_manual(
+    values = color_map,
+    guide = guide_legend(title = NULL, nrow = 4, byrow = TRUE)
+  ) +
+  scale_x_continuous(breaks = seq(min(df$Year, na.rm = TRUE), max(df$Year, na.rm = TRUE), by = 2)) +
+  scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+  labs(
+    title = "Urban–Rural Income Ratio in Chongqing",
+    subtitle = "Actual vs. counterfactual under multiplier effects of the land coupon policy",
+    x = NULL,
+    y = "Income Ratio (Urban : Rural)"
+  ) +
+  theme_bw(base_size = 12) +
+  theme(
+    panel.grid.major = element_line(color = "gray90", linewidth = 0.3),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "gray70", fill = NA, linewidth = 0.5),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "gray40"),
+    legend.position = c(0.02, 0.02),
+    legend.justification = c(0, 0),
+    legend.background = element_rect(color = "gray70", fill = "white", linewidth = 0.4),
+    legend.key = element_rect(fill = NA),
+    legend.text = element_text(size = 9),
+    axis.title.y = element_text(margin = margin(r = 6)),
+    axis.text = element_text(color = "gray20")
+  )+
+  guides(color = guide_legend(title = NULL, nrow = 6, byrow = TRUE))
+
+print(p)
+
+ggsave("multiplier_urban_rural_ratio.png", p, width = 6.5, height = 6.5, dpi = 300)
+```
+
+
+
+
